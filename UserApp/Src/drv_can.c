@@ -1,26 +1,59 @@
 /**
- * @file drv_can.c
- * @author yssickjgd (1345578933@qq.com)
- * @brief 仿照SCUT-Robotlab改写的CAN通信初始化与配置流程
- * @version 0.1
- * @date 2022-08-02
- *
- * @copyright USTC-RoboWalker (c) 2022
- *
- */
+  ******************************************************************************
+  * Copyright (c) 2019 - ~, SCUT-RobotLab Development Team
+  * @file    drv_can.c
+  * @author  Lv Junyu 13668997406@163.com
+  * @brief   Code for CAN driver in STM32 series MCU, supported packaged:
+  *          - STM32Cube_FW_F4_V1.24.0.
+  *          - STM32Cube_FW_F1_V1.8.0.
+  *          - STM32Cube_FW_H7_V1.5.0.
+  * @date    2020-07-15
+  * @version 1.2
+  * @par Change Log：
+  * <table>
+  * <tr><th>Date        <th>Version  <th>Author    		    <th>Description
+  * <tr><td>2019-06-12  <td> 1.0     <td>Mentos Seetoo    <td>Creator
+  * <tr><td>2019-11-03  <td> 1.1     <td>Lv Junyu         <td>Remove the precompiled macro \n
+  *                                                           Add new function interfaces.
+  * <tr><td>2020-07-15  <td> 1.2     <td>Mentos Seetoo    <td>Merge callback_register into init.
+  * </table>
+  *
+  ==============================================================================
+							How to use this driver
+  ==============================================================================
+	@note
+	  -# 调用`CAN_Init()`，初始化CAN,设置CAN接收处理函数的指针。
+	  -# 如需接收can中的消息，需调用CAN_Filter_Mask_Config配置滤波器（需注意配置格式）
+		  示例如下：`CAN_Filter_Mask_Config(&hcan1,CanFilter_1|CanFifo_0|Can_STDID|Can_DataType,0x3ff,0x3f0)`;
+	  -# 在需要用到发送的部分直接调用CANx_SendData()函数
+
+	@warning
+	  -# 本模块只能保存一条来自于同一个FIFO的消息(详细见下方HAL库FIFOx中断的
+		  实现),请注意及时读走消息。
+	  -# 添加预编译宏`USE_FULL_ASSERT`可以启用断言检查。
+
+  ******************************************************************************
+  * @attention
+  *
+  * if you had modified this file, please make sure your code does not have any
+  * bugs, update the version Number, write dowm your name and the date. The most
+  * important thing is make sure the users will have clear and definite under-
+  * standing through your new brief.
+  *
+  * <h2><center>&copy; Copyright (c) 2019 - ~, SCUT-RobotLab Development Team.
+  * All rights reserved.</center></h2>
+  ******************************************************************************
+*/
 
 /* Includes ------------------------------------------------------------------*/
-
 #include "drv_can.h"
 
-/* Private macros ------------------------------------------------------------*/
-
-/* Private types -------------------------------------------------------------*/
+/* Private define ------------------------------------------------------------*/
 
 /* Private variables ---------------------------------------------------------*/
 
-Struct_CAN_Manage_Object CAN1_Manage_Object = {0};
-Struct_CAN_Manage_Object CAN2_Manage_Object = {0};
+static void (*pCAN1_RxCpltCallback)(CAN_RxBuffer *);
+static void (*pCAN2_RxCpltCallback)(CAN_RxBuffer *);
 
 // CAN通信发送缓冲区
 uint8_t CAN1_0x1ff_Tx_Data[8];
@@ -32,33 +65,38 @@ uint8_t CAN2_0x200_Tx_Data[8];
 uint8_t CAN2_0x2ff_Tx_Data[8];
 
 uint8_t CAN1_0x220_Tx_Data[8];
+/* Private type --------------------------------------------------------------*/
 
 /* Private function declarations ---------------------------------------------*/
 
 /* function prototypes -------------------------------------------------------*/
 
 /**
- * @brief 初始化CAN总线
- *
- * @param hcan CAN编号
- * @param Callback_Function 处理回调函数
+ * @brief  Initialize CAN Bus
+ * @param  hcan: CANx created by CubeMX.
+ * @return None.
  */
-void CAN_Init(CAN_HandleTypeDef *hcan, CAN_Call_Back Callback_Function)
+uint8_t CAN_Init(CAN_HandleTypeDef *hcan, void (*pFunc)(CAN_RxBuffer *))
 {
-    HAL_CAN_Start(hcan);
-    __HAL_CAN_ENABLE_IT(hcan, CAN_IT_RX_FIFO0_MSG_PENDING);
-    __HAL_CAN_ENABLE_IT(hcan, CAN_IT_RX_FIFO1_MSG_PENDING);
+	/* Check the parameters */
+	assert_param(hcan != NULL);
 
-    if (hcan->Instance == CAN1)
-    {
-        CAN1_Manage_Object.CAN_Handler = hcan;
-        CAN1_Manage_Object.Callback_Function = Callback_Function;
-    }
-    else if (hcan->Instance == CAN2)
-    {
-        CAN2_Manage_Object.CAN_Handler = hcan;
-        CAN2_Manage_Object.Callback_Function = Callback_Function;
-    }
+	HAL_CAN_Start(hcan);
+	__HAL_CAN_ENABLE_IT(hcan, CAN_IT_RX_FIFO0_MSG_PENDING);
+	__HAL_CAN_ENABLE_IT(hcan, CAN_IT_RX_FIFO1_MSG_PENDING);
+
+	if (hcan->Instance == CAN1)
+	{
+		pCAN1_RxCpltCallback = pFunc;
+		return SUCCESS;
+	}
+	else if (hcan->Instance == CAN2)
+	{
+		pCAN2_RxCpltCallback = pFunc;
+		return SUCCESS;
+	}
+	else
+		return ERROR;
 }
 
 /**
@@ -71,149 +109,153 @@ void CAN_Init(CAN_HandleTypeDef *hcan, CAN_Call_Back Callback_Function)
  */
 void CAN_Filter_Mask_Config(CAN_HandleTypeDef *hcan, uint8_t Object_Para, uint32_t ID, uint32_t Mask_ID)
 {
-    CAN_FilterTypeDef can_filter_init_structure;
+	CAN_FilterTypeDef can_filter_init_structure;
 
-    //检测传参是否正确
-    assert_param(hcan != NULL);
+	// 检测传参是否正确
+	assert_param(hcan != NULL);
 
-    if ((Object_Para & 0x02))
-    {
-        //数据帧
-        //掩码后ID的高16bit
-        can_filter_init_structure.FilterIdHigh = ID << 3 << 16;
-        //掩码后ID的低16bit
-        can_filter_init_structure.FilterIdLow = ID << 3 | ((Object_Para & 0x03) << 1);
-        // ID掩码值高16bit
-        can_filter_init_structure.FilterMaskIdHigh = Mask_ID << 3 << 16;
-        // ID掩码值低16bit
-        can_filter_init_structure.FilterMaskIdLow = Mask_ID << 3 | ((Object_Para & 0x03) << 1);
-    }
-    else
-    {
-        //其他帧
-        //掩码后ID的高16bit
-        can_filter_init_structure.FilterIdHigh = ID << 5;
-        //掩码后ID的低16bit
-        can_filter_init_structure.FilterIdLow = ((Object_Para & 0x03) << 1);
-        // ID掩码值高16bit
-        can_filter_init_structure.FilterMaskIdHigh = Mask_ID << 5;
-        // ID掩码值低16bit
-        can_filter_init_structure.FilterMaskIdLow = ((Object_Para & 0x03) << 1);
-    }
-    //滤波器序号, 0-27, 共28个滤波器, 前14个在CAN1, 后14个在CAN2
-    can_filter_init_structure.FilterBank = Object_Para >> 3;
-    //滤波器绑定FIFO0
-    can_filter_init_structure.FilterFIFOAssignment = (Object_Para >> 2) & 0x01;
-    //使能滤波器
-    can_filter_init_structure.FilterActivation = ENABLE;
-    //滤波器模式，设置ID掩码模式
-    can_filter_init_structure.FilterMode = CAN_FILTERMODE_IDMASK;
-    // 32位滤波
-    can_filter_init_structure.FilterScale = CAN_FILTERSCALE_32BIT;
-    //从机模式选择开始单元
-    can_filter_init_structure.SlaveStartFilterBank = 14;
+	if ((Object_Para & 0x02))
+	{
+		// 数据帧
+		// 掩码后ID的高16bit
+		can_filter_init_structure.FilterIdHigh = ID << 3 << 16;
+		// 掩码后ID的低16bit
+		can_filter_init_structure.FilterIdLow = ID << 3 | ((Object_Para & 0x03) << 1);
+		// ID掩码值高16bit
+		can_filter_init_structure.FilterMaskIdHigh = Mask_ID << 3 << 16;
+		// ID掩码值低16bit
+		can_filter_init_structure.FilterMaskIdLow = Mask_ID << 3 | ((Object_Para & 0x03) << 1);
+	}
+	else
+	{
+		// 其他帧
+		// 掩码后ID的高16bit
+		can_filter_init_structure.FilterIdHigh = ID << 5;
+		// 掩码后ID的低16bit
+		can_filter_init_structure.FilterIdLow = ((Object_Para & 0x03) << 1);
+		// ID掩码值高16bit
+		can_filter_init_structure.FilterMaskIdHigh = Mask_ID << 5;
+		// ID掩码值低16bit
+		can_filter_init_structure.FilterMaskIdLow = ((Object_Para & 0x03) << 1);
+	}
+	// 滤波器序号, 0-27, 共28个滤波器, 前14个在CAN1, 后14个在CAN2
+	can_filter_init_structure.FilterBank = Object_Para >> 3;
+	// 滤波器绑定FIFO0
+	can_filter_init_structure.FilterFIFOAssignment = (Object_Para >> 2) & 0x01;
+	// 使能滤波器
+	can_filter_init_structure.FilterActivation = ENABLE;
+	// 滤波器模式，设置ID掩码模式
+	can_filter_init_structure.FilterMode = CAN_FILTERMODE_IDMASK;
+	// 32位滤波
+	can_filter_init_structure.FilterScale = CAN_FILTERSCALE_32BIT;
+	// 从机模式选择开始单元
+	can_filter_init_structure.SlaveStartFilterBank = 14;
 
-    HAL_CAN_ConfigFilter(hcan, &can_filter_init_structure);
+	HAL_CAN_ConfigFilter(hcan, &can_filter_init_structure);
 }
 
 /**
- * @brief 发送数据帧
- *
- * @param hcan CAN编号
- * @param ID ID
- * @param Data 被发送的数据指针
- * @param Length 长度
- * @return uint8_t 执行状态
+ * @brief  Send an communication frame by CAN.
+ * @param  hcan  :CAN bus used to send.
+ * @param  ID    :ID of frame.
+ * @param  *pData:Data to send.
+ * @param  Len   :Length of data.
+ * @return CAN_SUCCESS:  Operation success.
+ * @return CAN_LINE_BUSY:CAN line busy.
  */
-uint8_t CAN_Send_Data(CAN_HandleTypeDef *hcan, uint16_t ID, uint8_t *Data, uint16_t Length)
+uint8_t CANx_SendData(CAN_HandleTypeDef *hcan, uint16_t ID, uint8_t *pData, uint16_t Len)
 {
-    CAN_TxHeaderTypeDef tx_header;
-    uint32_t used_mailbox;
+	static CAN_TxHeaderTypeDef Tx_Header;
+	uint32_t used_mailbox;
+	/* Check the parameters */
+	assert_param(hcan != NULL);
 
-    //检测传参是否正确
-    assert_param(hcan != NULL);
+	Tx_Header.StdId = ID;
+	Tx_Header.ExtId = 0;
+	Tx_Header.IDE = 0;
+	Tx_Header.RTR = 0;
+	Tx_Header.DLC = Len;
 
-    tx_header.StdId = ID;
-    tx_header.ExtId = 0;
-    tx_header.IDE = 0;
-    tx_header.RTR = 0;
-    tx_header.DLC = Length;
+	if (HAL_CAN_AddTxMessage(hcan, &Tx_Header, pData, &used_mailbox) != HAL_OK)
+	{
+		return CAN_LINE_BUSY;
+	}
+	else
+	{
+	}
 
-    return (HAL_CAN_AddTxMessage(hcan, &tx_header, Data, &used_mailbox));
+	return CAN_SUCCESS;
 }
 
 /**
- * @brief CAN的TIM定时器中断发送回调函数
- *
+ * @brief  Send an extended communication frame by CAN.
+ * @param  hcan  :CAN bus used to send.
+ * @param  ID    :ID of frame.
+ * @param  *pData:Data to send.
+ * @param  Len   :Length of data.
+ * @return CAN_SUCCESS:  Operation success.
+ * @return CAN_LINE_BUSY:CAN line busy.
  */
-void TIM_CAN_PeriodElapsedCallback()
+uint8_t CANx_SendExtData(CAN_HandleTypeDef *hcan, uint16_t ID, uint8_t *pData, uint16_t Len)
 {
-    static int mod10 = 0;
+	CAN_TxHeaderTypeDef tx_header;
+	uint32_t used_mailbox;
 
-    mod10++;
+	// 检测传参是否正确
+	assert_param(hcan != NULL);
 
-    // CAN1电机
-    CAN_Send_Data(&hcan1, 0x1ff, CAN1_0x1ff_Tx_Data, 8);
-    CAN_Send_Data(&hcan1, 0x200, CAN1_0x200_Tx_Data, 8);
-    CAN_Send_Data(&hcan1, 0x2ff, CAN1_0x2ff_Tx_Data, 8);
+	tx_header.StdId = ID;
+	tx_header.ExtId = 0;
+	tx_header.IDE = 0;
+	tx_header.RTR = 0;
+	tx_header.DLC = Len;
 
-    // CAN2电机
-    CAN_Send_Data(&hcan2, 0x1ff, CAN2_0x1ff_Tx_Data, 8);
-    CAN_Send_Data(&hcan2, 0x200, CAN2_0x200_Tx_Data, 8);
-    CAN_Send_Data(&hcan2, 0x2ff, CAN2_0x2ff_Tx_Data, 8);
-
-    if (mod10 == 10 - 1)
-    {
-        mod10 = 0;
-        //CAN1超级电容
-        CAN_Send_Data(&hcan1, 0x220, CAN1_0x220_Tx_Data, 8);
-    }
+	return (HAL_CAN_AddTxMessage(hcan, &tx_header, pData, &used_mailbox));
 }
 
-/**
- * @brief HAL库CAN接收FIFO0中断
- *
- * @param hcan CAN编号
- */
+/*HAL库FIFO0中断*/
 void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan)
 {
-    //接收缓冲区
-    static Struct_CAN_Rx_Buffer can_rx_buffer;
+	/*!< CAN receive buffer */
+	static CAN_RxBuffer CAN_RxBuffer;
 
-    //选择回调函数
-    if (hcan->Instance == CAN1)
-    {
-        HAL_CAN_GetRxMessage(hcan, CAN_FILTER_FIFO0, &can_rx_buffer.Header, can_rx_buffer.Data);
-        CAN1_Manage_Object.Callback_Function(&can_rx_buffer);
-    }
-    else if (hcan->Instance == CAN2)
-    {
-        HAL_CAN_GetRxMessage(hcan, CAN_FILTER_FIFO0, &can_rx_buffer.Header, can_rx_buffer.Data);
-        CAN2_Manage_Object.Callback_Function(&can_rx_buffer);
-    }
+	/* Switch to user call back function. */
+	if (hcan->Instance == CAN1)
+	{
+		if (HAL_CAN_GetRxMessage(hcan, CAN_FILTER_FIFO0, &CAN_RxBuffer.header, CAN_RxBuffer.data) == HAL_ERROR)
+		{
+		};
+		pCAN1_RxCpltCallback(&CAN_RxBuffer);
+	}
+	else if (hcan->Instance == CAN2)
+	{
+		if (HAL_CAN_GetRxMessage(hcan, CAN_FILTER_FIFO0, &CAN_RxBuffer.header, CAN_RxBuffer.data) == HAL_ERROR)
+		{
+		};
+		pCAN2_RxCpltCallback(&CAN_RxBuffer);
+	}
 }
-
-/**
- * @brief HAL库CAN接收FIFO1中断
- *
- * @param hcan CAN编号
- */
+/*HAL库FIFO1中断*/
 void HAL_CAN_RxFifo1MsgPendingCallback(CAN_HandleTypeDef *hcan)
 {
-    //接收缓冲区
-    static Struct_CAN_Rx_Buffer can_rx_buffer;
+	/*!< CAN receive buffer */
+	static CAN_RxBuffer CAN_RxBuffer;
 
-    //选择回调函数
-    if (hcan->Instance == CAN1)
-    {
-        HAL_CAN_GetRxMessage(hcan, CAN_FILTER_FIFO1, &can_rx_buffer.Header, can_rx_buffer.Data);
-        CAN1_Manage_Object.Callback_Function(&can_rx_buffer);
-    }
-    else if (hcan->Instance == CAN2)
-    {
-        HAL_CAN_GetRxMessage(hcan, CAN_FILTER_FIFO1, &can_rx_buffer.Header, can_rx_buffer.Data);
-        CAN2_Manage_Object.Callback_Function(&can_rx_buffer);
-    }
+	/* Switch to user call back function. */
+	if (hcan->Instance == CAN1)
+	{
+		if (HAL_CAN_GetRxMessage(hcan, CAN_FILTER_FIFO1, &CAN_RxBuffer.header, CAN_RxBuffer.data) == HAL_ERROR)
+		{
+		};
+		pCAN1_RxCpltCallback(&CAN_RxBuffer);
+	}
+	else if (hcan->Instance == CAN2)
+	{
+		if (HAL_CAN_GetRxMessage(hcan, CAN_FILTER_FIFO1, &CAN_RxBuffer.header, CAN_RxBuffer.data) == HAL_ERROR)
+		{
+		};
+		pCAN2_RxCpltCallback(&CAN_RxBuffer);
+	}
 }
 
-/************************ COPYRIGHT(C) USTC-ROBOWALKER **************************/
+/************************ COPYRIGHT(C) SCUT-ROBOTLAB **************************/

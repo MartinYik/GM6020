@@ -1,94 +1,100 @@
 /**
- * @file drv_can.h
- * @author yssickjgd (1345578933@qq.com)
- * @brief 仿照SCUT-Robotlab改写的CAN通信初始化与配置流程
- * @version 0.1
- * @date 2022-08-02
+ ******************************************************************************
+ * Copyright (c) 2019 - ~, SCUT-RobotLab Development Team
+ * @file    drv_can.h
+ * @author  Lv Junyu 13668997406@163.com
+ * @brief   Code for CAN driver in STM32 series MCU, supported packaged:
+ *          - STM32Cube_FW_F4_V1.24.0.
+ *          - STM32Cube_FW_F1_V1.8.0.
+ *          - STM32Cube_FW_H7_V1.5.0.
+ ******************************************************************************
+ * @attention
  *
- * @copyright USTC-RoboWalker (c) 2022
+ * if you had modified this file, please make sure your code does not have any
+ * bugs, update the version Number, write dowm your name and the date. The most
+ * important thing is make sure the users will have clear and definite under-
+ * standing through your new brief.
  *
+ * <h2><center>&copy; Copyright (c) 2019 - ~, SCUT-RobotLab Development Team.
+ * All rights reserved.</center></h2>
+ ******************************************************************************
  */
+#ifndef _DRV_CAN_H
+#define _DRV_CAN_H
 
-#ifndef DRV_CAN_H
-#define DRV_CAN_H
-
+#ifdef __cplusplus
+extern "C"
+{
+#endif
 /* Includes ------------------------------------------------------------------*/
-
-#include "stm32f4xx_hal.h"
-
+#if defined(USE_HAL_DRIVER)
+#if defined(STM32F405xx) || defined(STM32F407xx)
+#include <stm32f4xx_hal.h>
+#endif
+#if defined(STM32F103xx)
+#include <stm32f1xx_hal.h>
+#endif
+#if defined(STM32H750xx)
+#include <stm32h7xx_hal.h>
+#endif
+#endif
+/* Private macros ------------------------------------------------------------*/
+/* Private type --------------------------------------------------------------*/
 /* Exported macros -----------------------------------------------------------*/
+#define CanFilter(x) ((x) << 3)
 
-// 滤波器编号
-#define CAN_FILTER(x) ((x) << 3)
+#define CanFifo_0 (0 << 2)
+#define CanFifo_1 (1 << 2)
 
-// 接收队列
-#define CAN_FIFO_0 (0 << 2)
-#define CAN_FIFO_1 (1 << 2)
+#define Can_STDID (0 << 1)
+#define Can_EXTID (1 << 1)
 
-//标准帧或扩展帧
-#define CAN_STDID (0 << 1)
-#define CAN_EXTID (1 << 1)
+#define Can_DataType (0 << 0)
+#define Can_RemoteType (1 << 0)
 
-// 数据帧或遥控帧
-#define CAN_DATA_TYPE (0 << 0)
-#define CAN_REMOTE_TYPE (1 << 0)
+#define CAN_LINE_BUSY 0
+#define CAN_SUCCESS 1
+#define CAN_FIFO_SIZE 1024
 
-/* Exported types ------------------------------------------------------------*/
+  /* Exported types ------------------------------------------------------------*/
+  typedef struct CAN_RxMessage
+  {
+    CAN_RxHeaderTypeDef header;
+    uint8_t data[8];
+  } CAN_RxBuffer;
 
-/**
- * @brief CAN接收的信息结构体
- *
- */
-struct Struct_CAN_Rx_Buffer
-{
-    CAN_RxHeaderTypeDef Header;
+  /* CAN message data type(Communication Object/标准数据帧) */
+  typedef struct
+  {
+    uint16_t ID;
+    uint8_t DLC;
     uint8_t Data[8];
-};
+  } CAN_COB;
 
-/**
- * @brief CAN通信接收回调函数数据类型
- *
- */
-typedef void (*CAN_Call_Back)(Struct_CAN_Rx_Buffer *);
+  /* Exported variables ---------------------------------------------------------*/
 
-/**
- * @brief CAN通信处理结构体
- *
- */
-struct Struct_CAN_Manage_Object
-{
-    CAN_HandleTypeDef *CAN_Handler;
-    CAN_Call_Back Callback_Function;
-};
+  extern CAN_HandleTypeDef hcan1;
+  extern CAN_HandleTypeDef hcan2;
 
-/* Exported variables ---------------------------------------------------------*/
+  extern uint8_t CAN1_0x1ff_Tx_Data[];
+  extern uint8_t CAN1_0x200_Tx_Data[];
+  extern uint8_t CAN1_0x2ff_Tx_Data[];
 
-extern CAN_HandleTypeDef hcan1;
-extern CAN_HandleTypeDef hcan2;
+  extern uint8_t CAN2_0x1ff_Tx_Data[];
+  extern uint8_t CAN2_0x200_Tx_Data[];
+  extern uint8_t CAN2_0x2ff_Tx_Data[];
 
-extern Struct_CAN_Manage_Object CAN1_Manage_Object;
-extern Struct_CAN_Manage_Object CAN2_Manage_Object;
+  extern uint8_t CAN1_0x220_Tx_Data[];
 
-extern uint8_t CAN1_0x1ff_Tx_Data[];
-extern uint8_t CAN1_0x200_Tx_Data[];
-extern uint8_t CAN1_0x2ff_Tx_Data[];
+  /* Exported function declarations ---------------------------------------------*/
+  uint8_t CAN_Init(CAN_HandleTypeDef *hcan, void (*pFunc)(CAN_RxBuffer *));
+  void CAN_Filter_Mask_Config(CAN_HandleTypeDef *hcan, uint8_t Object_Para, uint32_t ID, uint32_t Mask_ID);
+  uint8_t CANx_SendData(CAN_HandleTypeDef *hcan, uint16_t ID, uint8_t *pData, uint16_t Len);
+  uint8_t CANx_SendExtData(CAN_HandleTypeDef *hcan, uint16_t ID, uint8_t *pData, uint16_t Len);
 
-extern uint8_t CAN2_0x1ff_Tx_Data[];
-extern uint8_t CAN2_0x200_Tx_Data[];
-extern uint8_t CAN2_0x2ff_Tx_Data[];
-
-extern uint8_t CAN1_0x220_Tx_Data[];
-
-/* Exported function declarations ---------------------------------------------*/
-
-void CAN_Init(CAN_HandleTypeDef *hcan, CAN_Call_Back Callback_Function);
-
-void CAN_Filter_Mask_Config(CAN_HandleTypeDef *hcan, uint8_t Object_Para, uint32_t ID, uint32_t Mask_ID);
-
-uint8_t CAN_Send_Data(CAN_HandleTypeDef *hcan, uint16_t ID, uint8_t *Data, uint16_t Length);
-
-void TIM_CAN_PeriodElapsedCallback();
-
+#ifdef __cplusplus
+}
 #endif
 
-/************************ COPYRIGHT(C) USTC-ROBOWALKER **************************/
+#endif
+/************************ COPYRIGHT(C) SCUT-ROBOTLAB **************************/
