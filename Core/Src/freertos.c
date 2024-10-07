@@ -45,6 +45,8 @@
 
 /* Private variables ---------------------------------------------------------*/
 /* USER CODE BEGIN Variables */
+float Target = 50.0f * PI;
+float Current;
 
 /* USER CODE END Variables */
 /* Definitions for motorTask */
@@ -61,6 +63,13 @@ const osThreadAttr_t usartTask_attributes = {
 	.stack_size = 128 * 4,
 	.priority = (osPriority_t)osPriorityNormal,
 };
+/* Definitions for can1receivetask */
+osThreadId_t can1receivetaskHandle;
+const osThreadAttr_t can1receivetask_attributes = {
+	.name = "can1receivetask",
+	.stack_size = 128 * 4,
+	.priority = (osPriority_t)osPriorityAboveNormal,
+};
 
 /* Private function prototypes -----------------------------------------------*/
 /* USER CODE BEGIN FunctionPrototypes */
@@ -69,6 +78,7 @@ const osThreadAttr_t usartTask_attributes = {
 
 void MotorTask(void *argument);
 void UsartTask(void *argument);
+void CAN1_Receive_Task(void *argument);
 
 void MX_FREERTOS_Init(void); /* (MISRA C 2004 rule 8.1) */
 
@@ -106,6 +116,9 @@ void MX_FREERTOS_Init(void)
 	/* creation of usartTask */
 	usartTaskHandle = osThreadNew(UsartTask, NULL, &usartTask_attributes);
 
+	/* creation of can1receivetask */
+	can1receivetaskHandle = osThreadNew(CAN1_Receive_Task, NULL, &can1receivetask_attributes);
+
 	/* USER CODE BEGIN RTOS_THREADS */
 	/* add threads, ... */
 	/* USER CODE END RTOS_THREADS */
@@ -125,26 +138,18 @@ void MX_FREERTOS_Init(void)
 void MotorTask(void *argument)
 {
 	/* USER CODE BEGIN MotorTask */
-	int16_t torque = 0;
+	int16_t Torque;
+	PID_Controller PID_Speed = {200};
 	/* Infinite loop */
 	for (;;)
 	{
-		while (torque < 8192)
-		{
-			torque += 400;
-			CAN1_0x1ff_Tx_Data[0] = torque >> 8;
-			CAN1_0x1ff_Tx_Data[1] = torque;
-			CANx_SendData(&hcan1, 0x1ff, CAN1_0x1ff_Tx_Data, 8);
-			osDelay(50);
-		}
-		while (torque > -8192)
-		{
-			torque -= 400;
-			CAN1_0x1ff_Tx_Data[0] = torque >> 8;
-			CAN1_0x1ff_Tx_Data[1] = torque;
-			CANx_SendData(&hcan1, 0x1ff, CAN1_0x1ff_Tx_Data, 8);
-			osDelay(50);
-		}
+		float now_omega = Tx_Data[1];
+		Current = now_omega * 2.0f * PI / 60.0f;
+		Torque = PID_Increment(&PID_Speed, Current, Target);
+		CAN1_0x1ff_Tx_Data[0] = Torque >> 8;
+		CAN1_0x1ff_Tx_Data[1] = Torque;
+		CANx_SendData(&hcan1, 0x1ff, CAN1_0x1ff_Tx_Data, 8);
+		osDelay(50);
 	}
 	/* USER CODE END MotorTask */
 }
@@ -162,11 +167,30 @@ void UsartTask(void *argument)
 	/* Infinite loop */
 	for (;;)
 	{
-		HAL_UART_Transmit(&huart1, (uint8_t *)Tx_Data, sizeof(float) * 4, HAL_MAX_DELAY);
+		HAL_UART_Transmit(&huart1, (uint8_t *)&Target, sizeof(float), HAL_MAX_DELAY);
+		HAL_UART_Transmit(&huart1, (uint8_t *)&Current, sizeof(float), HAL_MAX_DELAY);
 		HAL_UART_Transmit(&huart1, tail, 4, 100);
 		osDelay(500);
 	}
 	/* USER CODE END UsartTask */
+}
+
+/* USER CODE BEGIN Header_CAN1_Receive_Task */
+/**
+ * @brief Function implementing the can1receivetask thread.
+ * @param argument: Not used
+ * @retval None
+ */
+/* USER CODE END Header_CAN1_Receive_Task */
+void CAN1_Receive_Task(void *argument)
+{
+	/* USER CODE BEGIN CAN1_Receive_Task */
+	/* Infinite loop */
+	for (;;)
+	{
+		osDelay(1);
+	}
+	/* USER CODE END CAN1_Receive_Task */
 }
 
 /* Private application code --------------------------------------------------*/
