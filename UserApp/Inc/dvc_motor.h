@@ -24,17 +24,18 @@ extern "C"
 	/* Exported macros -----------------------------------------------------------*/
 	typedef struct PID_Controller
 	{
-		float Kp, Ki, Kd;  // 系数
-		float Error_Last1; // 上次误差
-		float Error_Last2; // 上次误差
-		float Out_Last;	   // 上次输出
+		float Kp, Ki, Kd; // 系数
+		float p_out, d_out;
+		float i_out;
+		float last_err; // 上次误差
 	} PID_Controller;
 #define PI (3.14159265f)
+#define I_MAX 5000
+#define OUT_MAX 25000
 	/* Exported types ------------------------------------------------------------*/
 	/* Exported variables ---------------------------------------------------------*/
 	/* Exported function declarations ---------------------------------------------*/
-	float PID_Increment(PID_Controller *PID, float Current, float Target);
-	void Set_Motor();
+	float PID_Calc(PID_Controller *PID, float Current, float Target);
 
 #ifdef __cplusplus
 }

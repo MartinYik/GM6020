@@ -45,7 +45,9 @@
 
 /* Private variables ---------------------------------------------------------*/
 /* USER CODE BEGIN Variables */
-float Target = 50.0f * PI;
+// float Target = 50.0f * PI;
+const float Omega = 40.0f;
+float Target = 600;
 float Current;
 
 /* USER CODE END Variables */
@@ -139,17 +141,19 @@ void MotorTask(void *argument)
 {
 	/* USER CODE BEGIN MotorTask */
 	int16_t Torque;
-	PID_Controller PID_Speed = {200};
+	PID_Controller PID_Speed = {75, 0, 0};
+	PID_Speed.i_out = 0;
 	/* Infinite loop */
 	for (;;)
 	{
 		float now_omega = Tx_Data[1];
-		Current = now_omega * 2.0f * PI / 60.0f;
-		Torque = PID_Increment(&PID_Speed, Current, Target);
+		// Current = now_omega * 2.0f * PI / 60.0f;
+		Current = now_omega;
+		Torque = PID_Calc(&PID_Speed, Current, Target);
 		CAN1_0x1ff_Tx_Data[0] = Torque >> 8;
 		CAN1_0x1ff_Tx_Data[1] = Torque;
 		CANx_SendData(&hcan1, 0x1ff, CAN1_0x1ff_Tx_Data, 8);
-		osDelay(50);
+		osDelay(5);
 	}
 	/* USER CODE END MotorTask */
 }
