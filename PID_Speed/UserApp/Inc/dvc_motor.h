@@ -26,11 +26,13 @@ extern "C"
 	{
 		float Kp, Ki, Kd; // 系数
 		float p_out, d_out;
+		float i_max;
 		float i_out;
+		float err,out;
 		float last_err; // 上次误差
 	} PID_Controller;
 #define PI (3.14159265f)
-#define I_MAX 5000
+#define I_MAX 20000
 #define OUT_MAX 25000
 	/* Exported types ------------------------------------------------------------*/
 	/* Exported variables ---------------------------------------------------------*/

@@ -45,9 +45,8 @@
 
 /* Private variables ---------------------------------------------------------*/
 /* USER CODE BEGIN Variables */
-// float Target = 50.0f * PI;
-const float Omega = 40.0f;
-float Target = 600;
+
+float Target = 200;
 float Current;
 
 /* USER CODE END Variables */
@@ -141,8 +140,9 @@ void MotorTask(void *argument)
 {
 	/* USER CODE BEGIN MotorTask */
 	int16_t Torque;
-	PID_Controller PID_Speed = {75, 0, 0};
+	PID_Controller PID_Speed = {45, 15, 0};
 	PID_Speed.i_out = 0;
+	PID_Speed.i_max = 15000;
 	/* Infinite loop */
 	for (;;)
 	{
@@ -150,8 +150,8 @@ void MotorTask(void *argument)
 		// Current = now_omega * 2.0f * PI / 60.0f;
 		Current = now_omega;
 		Torque = PID_Calc(&PID_Speed, Current, Target);
-		CAN1_0x1ff_Tx_Data[0] = Torque >> 8;
-		CAN1_0x1ff_Tx_Data[1] = Torque;
+		CAN1_0x1ff_Tx_Data[4] = Torque >> 8;
+		CAN1_0x1ff_Tx_Data[5] = Torque;
 		CANx_SendData(&hcan1, 0x1ff, CAN1_0x1ff_Tx_Data, 8);
 		osDelay(5);
 	}
@@ -174,7 +174,7 @@ void UsartTask(void *argument)
 		HAL_UART_Transmit(&huart1, (uint8_t *)&Target, sizeof(float), HAL_MAX_DELAY);
 		HAL_UART_Transmit(&huart1, (uint8_t *)&Current, sizeof(float), HAL_MAX_DELAY);
 		HAL_UART_Transmit(&huart1, tail, 4, 100);
-		osDelay(500);
+		osDelay(5);
 	}
 	/* USER CODE END UsartTask */
 }
