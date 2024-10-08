@@ -46,9 +46,10 @@
 /* Private variables ---------------------------------------------------------*/
 /* USER CODE BEGIN Variables */
 
-float Target = 200;
-float Current;
-
+float Target_RPM = 200;
+float Now_RPM;
+float Target_Angle = 0;
+float Now_Angle;
 /* USER CODE END Variables */
 /* Definitions for motorTask */
 osThreadId_t motorTaskHandle;
@@ -141,15 +142,17 @@ void MotorTask(void *argument)
 	/* USER CODE BEGIN MotorTask */
 	int16_t Torque;
 	PID_Controller PID_Speed = {45, 15, 0};
+	PID_Controller PID_Position = {0};
 	PID_Speed.i_out = 0;
 	PID_Speed.i_max = 15000;
+	PID_Position.i_out = 0;
+	PID_Position.i_max = 15000;
 	/* Infinite loop */
 	for (;;)
 	{
-		float now_omega = Tx_Data[1];
-		// Current = now_omega * 2.0f * PI / 60.0f;
-		Current = now_omega;
-		Torque = PID_Calc(&PID_Speed, Current, Target);
+		Now_Angle = Tx_Data[0] * 360.0f / 8192.0f;
+		Now_RPM = Tx_Data[1];
+		Torque = PID_Calc(&PID_Speed, Now_RPM, Target_RPM);
 		CAN1_0x1ff_Tx_Data[4] = Torque >> 8;
 		CAN1_0x1ff_Tx_Data[5] = Torque;
 		CANx_SendData(&hcan1, 0x1ff, CAN1_0x1ff_Tx_Data, 8);
@@ -171,8 +174,8 @@ void UsartTask(void *argument)
 	/* Infinite loop */
 	for (;;)
 	{
-		HAL_UART_Transmit(&huart1, (uint8_t *)&Target, sizeof(float), HAL_MAX_DELAY);
-		HAL_UART_Transmit(&huart1, (uint8_t *)&Current, sizeof(float), HAL_MAX_DELAY);
+		HAL_UART_Transmit(&huart1, (uint8_t *)&Target_RPM, sizeof(float), HAL_MAX_DELAY);
+		HAL_UART_Transmit(&huart1, (uint8_t *)&Now_RPM, sizeof(float), HAL_MAX_DELAY);
 		HAL_UART_Transmit(&huart1, tail, 4, 100);
 		osDelay(5);
 	}

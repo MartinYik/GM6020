@@ -28,7 +28,7 @@ extern "C"
 		float p_out, d_out;
 		float i_max;
 		float i_out;
-		float err,out;
+		float err, out;
 		float last_err; // 上次误差
 	} PID_Controller;
 #define PI (3.14159265f)
@@ -38,7 +38,7 @@ extern "C"
 	/* Exported variables ---------------------------------------------------------*/
 	/* Exported function declarations ---------------------------------------------*/
 	float PID_Calc(PID_Controller *PID, float Current, float Target);
-
+	float limit(float value, float min, float max);
 #ifdef __cplusplus
 }
 #endif

@@ -148,17 +148,13 @@
           <Name>-U-O142 -O2254 -SF10000 -C0 -A0 -I0 -HNlocalhost -HP7184 -P1 -N00("ARM CoreSight SW-DP (ARM Core") -D00(2BA01477) -L00(0) -TO131090 -TC10000000 -TT10000000 -TP21 -TDS8007 -TDT0 -TDC1F -TIEFFFFFFFF -TIP8 -FO15 -FD20000000 -FC800 -FN1 -FF0STM32F4xx_1024.FLM -FS08000000 -FL0100000 -FP0($$Device:STM32F405RGTx$CMSIS\Flash\STM32F4xx_1024.FLM) -WA0 -WE0 -WVCE4 -WS2710 -WM0 -WP2</Name>
         </SetRegEntry>
       </TargetDriverDllRegistry>
-<<<<<<< HEAD
-      <Breakpoint/>
-=======
-<<<<<<< Updated upstream:MDK-ARM/GM6020.uvoptx
       <Breakpoint>
         <Bp>
           <Number>0</Number>
           <Type>0</Type>
-          <LineNumber>137</LineNumber>
-          <EnabledFlag>1</EnabledFlag>
-          <Address>134226264</Address>
+          <LineNumber>155</LineNumber>
+          <EnabledFlag>0</EnabledFlag>
+          <Address>134226558</Address>
           <ByteObject>0</ByteObject>
           <HtxType>0</HtxType>
           <ManyObjects>0</ManyObjects>
@@ -167,13 +163,9 @@
           <BreakIfRCount>1</BreakIfRCount>
           <Filename>../Core/Src/freertos.c</Filename>
           <ExecCommand></ExecCommand>
-          <Expression>\\GM6020\../Core/Src/freertos.c\137</Expression>
+          <Expression>\\GM6020\../Core/Src/freertos.c\155</Expression>
         </Bp>
       </Breakpoint>
-=======
-      <Breakpoint/>
->>>>>>> Stashed changes:PID_Speed/MDK-ARM/GM6020.uvoptx
->>>>>>> 2cb510fc2a8734a0b3aa2c7d6afd064e45a52b71
       <WatchWindow1>
         <Ww>
           <count>0</count>
@@ -184,7 +176,6 @@
           <count>1</count>
           <WinNumber>1</WinNumber>
           <ItemText>Current</ItemText>
-<<<<<<< HEAD
         </Ww>
         <Ww>
           <count>2</count>
@@ -205,32 +196,7 @@
           <count>5</count>
           <WinNumber>1</WinNumber>
           <ItemText>Tx_Data,0x0A</ItemText>
-=======
->>>>>>> 2cb510fc2a8734a0b3aa2c7d6afd064e45a52b71
         </Ww>
-<<<<<<< Updated upstream:MDK-ARM/GM6020.uvoptx
-=======
-        <Ww>
-          <count>2</count>
-          <WinNumber>1</WinNumber>
-          <ItemText>Tx_Data[1],0x0A</ItemText>
-        </Ww>
-        <Ww>
-          <count>3</count>
-          <WinNumber>1</WinNumber>
-          <ItemText>Target,0x0A</ItemText>
-        </Ww>
-        <Ww>
-          <count>4</count>
-          <WinNumber>1</WinNumber>
-          <ItemText>PID_Speed</ItemText>
-        </Ww>
-        <Ww>
-          <count>5</count>
-          <WinNumber>1</WinNumber>
-          <ItemText>Tx_Data,0x0A</ItemText>
-        </Ww>
->>>>>>> Stashed changes:PID_Speed/MDK-ARM/GM6020.uvoptx
       </WatchWindow1>
       <Tracepoint>
         <THDelay>0</THDelay>
