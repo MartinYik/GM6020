@@ -56,7 +56,7 @@
 
 /* Private variables ---------------------------------------------------------*/
 uint8_t tail[4] = {0x00, 0x00, 0x80, 0x7F};
-float Tx_Data[4];
+int16_t Tx_Data[4];
 
 usart_manage_obj_t usart4_manage_obj =
 	{

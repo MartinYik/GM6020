@@ -45,6 +45,12 @@
 
 /* Private variables ---------------------------------------------------------*/
 /* USER CODE BEGIN Variables */
+<<<<<<< Updated upstream:Core/Src/freertos.c
+=======
+
+float Target = 200;
+float Current;
+>>>>>>> Stashed changes:PID_Speed/Core/Src/freertos.c
 
 /* USER CODE END Variables */
 /* Definitions for motorTask */
@@ -125,6 +131,7 @@ void MX_FREERTOS_Init(void)
 void MotorTask(void *argument)
 {
 	/* USER CODE BEGIN MotorTask */
+<<<<<<< Updated upstream:Core/Src/freertos.c
 	int16_t torque = 0;
 	/* Infinite loop */
 	for (;;)
@@ -145,6 +152,23 @@ void MotorTask(void *argument)
 			CANx_SendData(&hcan1, 0x1ff, CAN1_0x1ff_Tx_Data, 8);
 			osDelay(50);
 		}
+=======
+	int16_t Torque;
+	PID_Controller PID_Speed = {45, 15, 0};
+	PID_Speed.i_out = 0;
+	PID_Speed.i_max = 15000;
+	/* Infinite loop */
+	for (;;)
+	{
+		float now_omega = Tx_Data[1];
+		// Current = now_omega * 2.0f * PI / 60.0f;
+		Current = now_omega;
+		Torque = PID_Calc(&PID_Speed, Current, Target);
+		CAN1_0x1ff_Tx_Data[4] = Torque >> 8;
+		CAN1_0x1ff_Tx_Data[5] = Torque;
+		CANx_SendData(&hcan1, 0x1ff, CAN1_0x1ff_Tx_Data, 8);
+		osDelay(5);
+>>>>>>> Stashed changes:PID_Speed/Core/Src/freertos.c
 	}
 	/* USER CODE END MotorTask */
 }
@@ -164,7 +188,7 @@ void UsartTask(void *argument)
 	{
 		HAL_UART_Transmit(&huart1, (uint8_t *)Tx_Data, sizeof(float) * 4, HAL_MAX_DELAY);
 		HAL_UART_Transmit(&huart1, tail, 4, 100);
-		osDelay(500);
+		osDelay(5);
 	}
 	/* USER CODE END UsartTask */
 }

@@ -148,6 +148,7 @@
           <Name>-U-O142 -O2254 -SF10000 -C0 -A0 -I0 -HNlocalhost -HP7184 -P1 -N00("ARM CoreSight SW-DP (ARM Core") -D00(2BA01477) -L00(0) -TO131090 -TC10000000 -TT10000000 -TP21 -TDS8007 -TDT0 -TDC1F -TIEFFFFFFFF -TIP8 -FO15 -FD20000000 -FC800 -FN1 -FF0STM32F4xx_1024.FLM -FS08000000 -FL0100000 -FP0($$Device:STM32F405RGTx$CMSIS\Flash\STM32F4xx_1024.FLM) -WA0 -WE0 -WVCE4 -WS2710 -WM0 -WP2</Name>
         </SetRegEntry>
       </TargetDriverDllRegistry>
+<<<<<<< Updated upstream:MDK-ARM/GM6020.uvoptx
       <Breakpoint>
         <Bp>
           <Number>0</Number>
@@ -166,17 +167,43 @@
           <Expression>\\GM6020\../Core/Src/freertos.c\137</Expression>
         </Bp>
       </Breakpoint>
+=======
+      <Breakpoint/>
+>>>>>>> Stashed changes:PID_Speed/MDK-ARM/GM6020.uvoptx
       <WatchWindow1>
         <Ww>
           <count>0</count>
           <WinNumber>1</WinNumber>
-          <ItemText>torque,0x0A</ItemText>
+          <ItemText>CAN1_0x1ff_Tx_Data,0x0A</ItemText>
         </Ww>
         <Ww>
           <count>1</count>
           <WinNumber>1</WinNumber>
-          <ItemText>CAN1_0x1ff_Tx_Data,0x0A</ItemText>
+          <ItemText>Current</ItemText>
         </Ww>
+<<<<<<< Updated upstream:MDK-ARM/GM6020.uvoptx
+=======
+        <Ww>
+          <count>2</count>
+          <WinNumber>1</WinNumber>
+          <ItemText>Tx_Data[1],0x0A</ItemText>
+        </Ww>
+        <Ww>
+          <count>3</count>
+          <WinNumber>1</WinNumber>
+          <ItemText>Target,0x0A</ItemText>
+        </Ww>
+        <Ww>
+          <count>4</count>
+          <WinNumber>1</WinNumber>
+          <ItemText>PID_Speed</ItemText>
+        </Ww>
+        <Ww>
+          <count>5</count>
+          <WinNumber>1</WinNumber>
+          <ItemText>Tx_Data,0x0A</ItemText>
+        </Ww>
+>>>>>>> Stashed changes:PID_Speed/MDK-ARM/GM6020.uvoptx
       </WatchWindow1>
       <Tracepoint>
         <THDelay>0</THDelay>

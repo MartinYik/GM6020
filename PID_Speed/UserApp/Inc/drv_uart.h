@@ -67,7 +67,7 @@ extern "C"
   /* Exported types ------------------------------------------------------------*/
   /* Exported variables --------------------------------------------------------*/
   extern uint8_t tail[4];
-  extern float Tx_Data[4];
+  extern int16_t Tx_Data[4];
 
   extern usart_manage_obj_t usart4_manage_obj;
   extern usart_manage_obj_t usart5_manage_obj;
