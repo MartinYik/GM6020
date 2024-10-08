@@ -86,6 +86,7 @@ void CAN_Motor_Call_Back(CAN_RxBuffer *Rx_Buffer)
  */
 int main(void)
 {
+<<<<<<< HEAD
   /* USER CODE BEGIN 1 */
 
   /* USER CODE END 1 */
@@ -106,6 +107,45 @@ int main(void)
 
   /* USER CODE END SysInit */
 
+=======
+	/* USER CODE BEGIN 1 */
+
+	/* USER CODE END 1 */
+
+	/* MCU Configuration--------------------------------------------------------*/
+
+	/* Reset of all peripherals, Initializes the Flash interface and the Systick. */
+	HAL_Init();
+
+	/* USER CODE BEGIN Init */
+
+	/* USER CODE END Init */
+
+	/* Configure the system clock */
+	SystemClock_Config();
+
+	/* USER CODE BEGIN SysInit */
+
+	/* USER CODE END SysInit */
+
+<<<<<<< Updated upstream:Core/Src/main.c
+	/* Initialize all configured peripherals */
+	MX_GPIO_Init();
+	MX_DMA_Init();
+	MX_CAN1_Init();
+	MX_CAN2_Init();
+	MX_USART1_UART_Init();
+	/* USER CODE BEGIN 2 */
+	CAN_Init(&hcan1, CAN_Motor_Call_Back);
+	Uart_Init(&huart1, NULL, 0, NULL);
+	CAN_Filter_Mask_Config(&hcan1, CanFilter(13) | CanFifo_1 | Can_STDID | Can_DataType, 0x205, 0x7FF);
+	/* USER CODE END 2 */
+
+	/* Init scheduler */
+	osKernelInitialize(); /* Call init function for freertos objects (in freertos.c) */
+	MX_FREERTOS_Init();
+=======
+>>>>>>> 2cb510fc2a8734a0b3aa2c7d6afd064e45a52b71
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
   MX_DMA_Init();
@@ -121,6 +161,7 @@ int main(void)
   /* Init scheduler */
   osKernelInitialize(); /* Call init function for freertos objects (in freertos.c) */
   MX_FREERTOS_Init();
+<<<<<<< HEAD
 
   /* Start scheduler */
   osKernelStart();
@@ -128,6 +169,25 @@ int main(void)
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
 
+=======
+>>>>>>> Stashed changes:PID_Speed/Core/Src/main.c
+
+	/* Start scheduler */
+	osKernelStart();
+	/* We should never get here as control is now taken by the scheduler */
+	/* Infinite loop */
+	/* USER CODE BEGIN WHILE */
+
+<<<<<<< Updated upstream:Core/Src/main.c
+	while (1)
+	{
+		/* USER CODE END WHILE */
+
+		/* USER CODE BEGIN 3 */
+	}
+	/* USER CODE END 3 */
+=======
+>>>>>>> 2cb510fc2a8734a0b3aa2c7d6afd064e45a52b71
   while (1)
   {
     /* USER CODE END WHILE */
@@ -135,6 +195,10 @@ int main(void)
     /* USER CODE BEGIN 3 */
   }
   /* USER CODE END 3 */
+<<<<<<< HEAD
+=======
+>>>>>>> Stashed changes:PID_Speed/Core/Src/main.c
+>>>>>>> 2cb510fc2a8734a0b3aa2c7d6afd064e45a52b71
 }
 
 /**
@@ -143,9 +207,46 @@ int main(void)
  */
 void SystemClock_Config(void)
 {
+<<<<<<< HEAD
   RCC_OscInitTypeDef RCC_OscInitStruct = {0};
   RCC_ClkInitTypeDef RCC_ClkInitStruct = {0};
 
+=======
+	RCC_OscInitTypeDef RCC_OscInitStruct = {0};
+	RCC_ClkInitTypeDef RCC_ClkInitStruct = {0};
+
+<<<<<<< Updated upstream:Core/Src/main.c
+	/** Configure the main internal regulator output voltage
+	 */
+	__HAL_RCC_PWR_CLK_ENABLE();
+	__HAL_PWR_VOLTAGESCALING_CONFIG(PWR_REGULATOR_VOLTAGE_SCALE1);
+
+	/** Initializes the RCC Oscillators according to the specified parameters
+	 * in the RCC_OscInitTypeDef structure.
+	 */
+	RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSI;
+	RCC_OscInitStruct.HSIState = RCC_HSI_ON;
+	RCC_OscInitStruct.HSICalibrationValue = RCC_HSICALIBRATION_DEFAULT;
+	RCC_OscInitStruct.PLL.PLLState = RCC_PLL_ON;
+	RCC_OscInitStruct.PLL.PLLSource = RCC_PLLSOURCE_HSI;
+	RCC_OscInitStruct.PLL.PLLM = 8;
+	RCC_OscInitStruct.PLL.PLLN = 168;
+	RCC_OscInitStruct.PLL.PLLP = RCC_PLLP_DIV2;
+	RCC_OscInitStruct.PLL.PLLQ = 4;
+	if (HAL_RCC_OscConfig(&RCC_OscInitStruct) != HAL_OK)
+	{
+		Error_Handler();
+	}
+
+	/** Initializes the CPU, AHB and APB buses clocks
+	 */
+	RCC_ClkInitStruct.ClockType = RCC_CLOCKTYPE_HCLK | RCC_CLOCKTYPE_SYSCLK | RCC_CLOCKTYPE_PCLK1 | RCC_CLOCKTYPE_PCLK2;
+	RCC_ClkInitStruct.SYSCLKSource = RCC_SYSCLKSOURCE_PLLCLK;
+	RCC_ClkInitStruct.AHBCLKDivider = RCC_SYSCLK_DIV1;
+	RCC_ClkInitStruct.APB1CLKDivider = RCC_HCLK_DIV4;
+	RCC_ClkInitStruct.APB2CLKDivider = RCC_HCLK_DIV2;
+=======
+>>>>>>> 2cb510fc2a8734a0b3aa2c7d6afd064e45a52b71
   /** Configure the main internal regulator output voltage
    */
   __HAL_RCC_PWR_CLK_ENABLE();
@@ -175,11 +276,20 @@ void SystemClock_Config(void)
   RCC_ClkInitStruct.AHBCLKDivider = RCC_SYSCLK_DIV1;
   RCC_ClkInitStruct.APB1CLKDivider = RCC_HCLK_DIV4;
   RCC_ClkInitStruct.APB2CLKDivider = RCC_HCLK_DIV2;
+<<<<<<< HEAD
 
   if (HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_5) != HAL_OK)
   {
     Error_Handler();
   }
+=======
+>>>>>>> Stashed changes:PID_Speed/Core/Src/main.c
+
+	if (HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_5) != HAL_OK)
+	{
+		Error_Handler();
+	}
+>>>>>>> 2cb510fc2a8734a0b3aa2c7d6afd064e45a52b71
 }
 
 /* USER CODE BEGIN 4 */
@@ -196,16 +306,35 @@ void SystemClock_Config(void)
  */
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 {
+<<<<<<< HEAD
   /* USER CODE BEGIN Callback 0 */
 
+=======
+	/* USER CODE BEGIN Callback 0 */
+
+<<<<<<< Updated upstream:Core/Src/main.c
+	/* USER CODE END Callback 0 */
+	if (htim->Instance == TIM7)
+	{
+		HAL_IncTick();
+	}
+	/* USER CODE BEGIN Callback 1 */
+=======
+>>>>>>> 2cb510fc2a8734a0b3aa2c7d6afd064e45a52b71
   /* USER CODE END Callback 0 */
   if (htim->Instance == TIM7)
   {
     HAL_IncTick();
   }
   /* USER CODE BEGIN Callback 1 */
+<<<<<<< HEAD
 
   /* USER CODE END Callback 1 */
+=======
+>>>>>>> Stashed changes:PID_Speed/Core/Src/main.c
+
+	/* USER CODE END Callback 1 */
+>>>>>>> 2cb510fc2a8734a0b3aa2c7d6afd064e45a52b71
 }
 
 /**
@@ -214,6 +343,18 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
  */
 void Error_Handler(void)
 {
+<<<<<<< HEAD
+=======
+<<<<<<< Updated upstream:Core/Src/main.c
+	/* USER CODE BEGIN Error_Handler_Debug */
+	/* User can add his own implementation to report the HAL error return state */
+	__disable_irq();
+	while (1)
+	{
+	}
+	/* USER CODE END Error_Handler_Debug */
+=======
+>>>>>>> 2cb510fc2a8734a0b3aa2c7d6afd064e45a52b71
   /* USER CODE BEGIN Error_Handler_Debug */
   /* User can add his own implementation to report the HAL error return state */
   __disable_irq();
@@ -221,6 +362,10 @@ void Error_Handler(void)
   {
   }
   /* USER CODE END Error_Handler_Debug */
+<<<<<<< HEAD
+=======
+>>>>>>> Stashed changes:PID_Speed/Core/Src/main.c
+>>>>>>> 2cb510fc2a8734a0b3aa2c7d6afd064e45a52b71
 }
 
 #ifdef USE_FULL_ASSERT
@@ -233,9 +378,22 @@ void Error_Handler(void)
  */
 void assert_failed(uint8_t *file, uint32_t line)
 {
+<<<<<<< HEAD
+=======
+<<<<<<< Updated upstream:Core/Src/main.c
+	/* USER CODE BEGIN 6 */
+	/* User can add his own implementation to report the file name and line number,
+	   ex: printf("Wrong parameters value: file %s on line %d\r\n", file, line) */
+	/* USER CODE END 6 */
+=======
+>>>>>>> 2cb510fc2a8734a0b3aa2c7d6afd064e45a52b71
   /* USER CODE BEGIN 6 */
   /* User can add his own implementation to report the file name and line number,
      ex: printf("Wrong parameters value: file %s on line %d\r\n", file, line) */
   /* USER CODE END 6 */
+<<<<<<< HEAD
+=======
+>>>>>>> Stashed changes:PID_Speed/Core/Src/main.c
+>>>>>>> 2cb510fc2a8734a0b3aa2c7d6afd064e45a52b71
 }
 #endif /* USE_FULL_ASSERT */
