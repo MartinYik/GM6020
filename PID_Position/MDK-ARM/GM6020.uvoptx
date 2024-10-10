@@ -152,9 +152,9 @@
         <Bp>
           <Number>0</Number>
           <Type>0</Type>
-          <LineNumber>155</LineNumber>
+          <LineNumber>150</LineNumber>
           <EnabledFlag>0</EnabledFlag>
-          <Address>134226558</Address>
+          <Address>134227726</Address>
           <ByteObject>0</ByteObject>
           <HtxType>0</HtxType>
           <ManyObjects>0</ManyObjects>
@@ -163,7 +163,7 @@
           <BreakIfRCount>1</BreakIfRCount>
           <Filename>../Core/Src/freertos.c</Filename>
           <ExecCommand></ExecCommand>
-          <Expression>\\GM6020\../Core/Src/freertos.c\155</Expression>
+          <Expression>\\GM6020\../Core/Src/freertos.c\150</Expression>
         </Bp>
       </Breakpoint>
       <WatchWindow1>
@@ -175,17 +175,17 @@
         <Ww>
           <count>1</count>
           <WinNumber>1</WinNumber>
-          <ItemText>Current</ItemText>
+          <ItemText>Tx_Data[1],0x0A</ItemText>
         </Ww>
         <Ww>
           <count>2</count>
           <WinNumber>1</WinNumber>
-          <ItemText>Tx_Data[1],0x0A</ItemText>
+          <ItemText>Tx_Data,0x0A</ItemText>
         </Ww>
         <Ww>
           <count>3</count>
           <WinNumber>1</WinNumber>
-          <ItemText>Target,0x0A</ItemText>
+          <ItemText>\\GM6020\../Core/Src/freertos.c\Target_RPM</ItemText>
         </Ww>
         <Ww>
           <count>4</count>
@@ -195,7 +195,17 @@
         <Ww>
           <count>5</count>
           <WinNumber>1</WinNumber>
-          <ItemText>Tx_Data,0x0A</ItemText>
+          <ItemText>PID_Position</ItemText>
+        </Ww>
+        <Ww>
+          <count>6</count>
+          <WinNumber>1</WinNumber>
+          <ItemText>Now_Angle</ItemText>
+        </Ww>
+        <Ww>
+          <count>7</count>
+          <WinNumber>1</WinNumber>
+          <ItemText>Target_Angle</ItemText>
         </Ww>
       </WatchWindow1>
       <Tracepoint>

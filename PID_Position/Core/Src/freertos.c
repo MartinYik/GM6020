@@ -132,18 +132,19 @@ void MotorTask(void *argument)
   int16_t Torque;
   float Angle_PID_Out;
   PID_Controller PID_Speed = {45, 15, 0};
-  PID_Controller PID_Position = {0};
+  PID_Controller PID_Position = {4,0.15,1};
   PID_Speed.i_out = 0;
   PID_Speed.i_max = 15000;
   PID_Position.i_out = 0;
-  PID_Position.i_max = 15000;
+  PID_Position.i_max = 5;
   /* Infinite loop */
   for (;;)
   {
     Now_Angle = Tx_Data[0] * 360.0f / 8192.0f;
     Now_RPM = Tx_Data[1];
     Angle_PID_Out = PID_Calc(&PID_Position, Now_Angle, Target_Angle);
-    Torque = PID_Calc(&PID_Position, Now_RPM, Angle_PID_Out);
+    Torque = PID_Calc(&PID_Speed, Now_RPM, Angle_PID_Out);
+    // Torque = PID_Calc(&PID_Speed, Now_RPM, Target_RPM);
     CAN1_0x1ff_Tx_Data[4] = Torque >> 8;
     CAN1_0x1ff_Tx_Data[5] = Torque;
     CANx_SendData(&hcan1, 0x1ff, CAN1_0x1ff_Tx_Data, 8);
@@ -165,8 +166,8 @@ void UsartTask(void *argument)
   /* Infinite loop */
   for (;;)
   {
-    HAL_UART_Transmit(&huart1, (uint8_t *)&Target_RPM, sizeof(float), HAL_MAX_DELAY);
-    HAL_UART_Transmit(&huart1, (uint8_t *)&Now_RPM, sizeof(float), HAL_MAX_DELAY);
+    HAL_UART_Transmit(&huart1, (uint8_t *)&Target_Angle, sizeof(float), HAL_MAX_DELAY);
+    HAL_UART_Transmit(&huart1, (uint8_t *)&Now_Angle, sizeof(float), HAL_MAX_DELAY);
     HAL_UART_Transmit(&huart1, tail, 4, 100);
     osDelay(5);
   }
