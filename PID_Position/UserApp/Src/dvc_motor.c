@@ -1,5 +1,6 @@
 #include "dvc_motor.h"
 
+Motor_GM6020 motor;
 float PID_Calc(PID_Controller *PID, float Current, float Target)
 {
     PID->err = Target - Current;
@@ -21,4 +22,9 @@ float limit(float value, float min, float max)
         return min;
     else
         return value;
+}
+
+void Motor_Call_Back(uint8_t *RxData)
+{
+    
 }

@@ -132,7 +132,7 @@ void MotorTask(void *argument)
   int16_t Torque;
   float Angle_PID_Out;
   PID_Controller PID_Speed = {45, 15, 0};
-  PID_Controller PID_Position = {4,0.15,1};
+  PID_Controller PID_Position = {5, 0.5, 0};
   PID_Speed.i_out = 0;
   PID_Speed.i_max = 15000;
   PID_Position.i_out = 0;
@@ -140,8 +140,8 @@ void MotorTask(void *argument)
   /* Infinite loop */
   for (;;)
   {
-    Now_Angle = Tx_Data[0] * 360.0f / 8192.0f;
-    Now_RPM = Tx_Data[1];
+    Now_Angle = (float)motor.Total_Encoder / 8192.f * 360.f;
+    Now_RPM = motor.Rx_RPM;
     Angle_PID_Out = PID_Calc(&PID_Position, Now_Angle, Target_Angle);
     Torque = PID_Calc(&PID_Speed, Now_RPM, Angle_PID_Out);
     // Torque = PID_Calc(&PID_Speed, Now_RPM, Target_RPM);

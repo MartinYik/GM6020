@@ -91,7 +91,6 @@ extern "C"
   void CAN_Filter_Mask_Config(CAN_HandleTypeDef *hcan, uint8_t Object_Para, uint32_t ID, uint32_t Mask_ID);
   uint8_t CANx_SendData(CAN_HandleTypeDef *hcan, uint16_t ID, uint8_t *pData, uint16_t Len);
   uint8_t CANx_SendExtData(CAN_HandleTypeDef *hcan, uint16_t ID, uint8_t *pData, uint16_t Len);
-
 #ifdef __cplusplus
 }
 #endif
