@@ -131,8 +131,8 @@ void MotorTask(void *argument)
   /* USER CODE BEGIN MotorTask */
   int16_t Torque;
   float Angle_PID_Out;
-  PID_Controller PID_Speed = {45, 15, 0};
-  PID_Controller PID_Position = {5, 0.5, 0};
+  PID_Controller PID_Speed = {60, 0, 0};
+  PID_Controller PID_Position = {3.5, 0.6, 7};
   PID_Speed.i_out = 0;
   PID_Speed.i_max = 15000;
   PID_Position.i_out = 0;
@@ -143,6 +143,7 @@ void MotorTask(void *argument)
     Now_Angle = (float)motor.Total_Encoder / 8192.f * 360.f;
     Now_RPM = motor.Rx_RPM;
     Angle_PID_Out = PID_Calc(&PID_Position, Now_Angle, Target_Angle);
+	// HAL_UART_Transmit(&huart1, (uint8_t *)&Angle_PID_Out, sizeof(float), HAL_MAX_DELAY);
     Torque = PID_Calc(&PID_Speed, Now_RPM, Angle_PID_Out);
     // Torque = PID_Calc(&PID_Speed, Now_RPM, Target_RPM);
     CAN1_0x1ff_Tx_Data[4] = Torque >> 8;
