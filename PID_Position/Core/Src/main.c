@@ -70,7 +70,7 @@ void CAN_Motor_Call_Back(CAN_RxBuffer *Rx_Buffer)
   {
   case (0x207):
   {
-	int16_t Delta_Encoder;
+    int16_t Delta_Encoder;
     motor.Pre_Encoder = motor.Rx_Encoder;
     // Tx_Data[0] = (Rx_Data[0] << 8) | Rx_Data[1];
     // Tx_Data[1] = (Rx_Data[2] << 8) | Rx_Data[3];
@@ -83,13 +83,13 @@ void CAN_Motor_Call_Back(CAN_RxBuffer *Rx_Buffer)
     Delta_Encoder = motor.Rx_Encoder - motor.Pre_Encoder;
     if (Delta_Encoder < -4096)
     {
-        // 正方向转过了一圈
-        motor.Total_Round++;
+      // 正方向转过了一圈
+      motor.Total_Round++;
     }
     else if (Delta_Encoder > 4096)
     {
-        // 反方向转过了一圈
-        motor.Total_Round--;
+      // 反方向转过了一圈
+      motor.Total_Round--;
     }
     motor.Total_Encoder = motor.Total_Round * 8192.f + motor.Rx_Encoder;
   }

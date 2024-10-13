@@ -134,7 +134,7 @@ int main(void)
   /* USER CODE BEGIN 2 */
   CAN_Init(&hcan1, CAN_Motor_Call_Back);
   Uart_Init(&huart1, NULL, 0, NULL);
-  CAN_Filter_Mask_Config(&hcan1, CanFilter(13) | CanFifo_1 | Can_STDID | Can_DataType, 0x207, 0x7FF);
+  CAN_Filter_Mask_Config(&hcan1, CanFilter(13) | CanFifo_1 | Can_STDID | Can_DataType, 0x205, 0x7FF);
   /* USER CODE END 2 */
 
   /* Init scheduler */

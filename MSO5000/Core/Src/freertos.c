@@ -142,25 +142,15 @@ void MotorTask(void *argument)
 {
   /* USER CODE BEGIN MotorTask */
   int16_t Torque = 0;
+  Torque = 5000;
+  CAN1_0x1ff_Tx_Data[0] = Torque >> 8;
+  CAN1_0x1ff_Tx_Data[1] = Torque;
   /* Infinite loop */
   for (;;)
   {
-    while (Torque < 25000)
-    {
-      Torque += 500;
-      CAN1_0x1ff_Tx_Data[0] = Torque >> 8;
-      CAN1_0x1ff_Tx_Data[1] = Torque;
-      CANx_SendData(&hcan1, 0x1ff, CAN1_0x1ff_Tx_Data, 8);
-      osDelay(5);
-    }
-    while (Torque > -25000)
-    {
-      Torque -= 500;
-      CAN1_0x1ff_Tx_Data[0] = Torque >> 8;
-      CAN1_0x1ff_Tx_Data[1] = Torque;
-      CANx_SendData(&hcan1, 0x1ff, CAN1_0x1ff_Tx_Data, 8);
-      osDelay(5);
-    }
+
+    CANx_SendData(&hcan1, 0x1ff, CAN1_0x1ff_Tx_Data, 8);
+    osDelay(5);
   }
   /* USER CODE END MotorTask */
 }
