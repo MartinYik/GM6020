@@ -1,20 +1,20 @@
 /* USER CODE BEGIN Header */
 /**
-  ******************************************************************************
-  * File Name          : freertos.c
-  * Description        : Code for freertos applications
-  ******************************************************************************
-  * @attention
-  *
-  * Copyright (c) 2024 STMicroelectronics.
-  * All rights reserved.
-  *
-  * This software is licensed under terms that can be found in the LICENSE file
-  * in the root directory of this software component.
-  * If no LICENSE file comes with this software, it is provided AS-IS.
-  *
-  ******************************************************************************
-  */
+ ******************************************************************************
+ * File Name          : freertos.c
+ * Description        : Code for freertos applications
+ ******************************************************************************
+ * @attention
+ *
+ * Copyright (c) 2024 STMicroelectronics.
+ * All rights reserved.
+ *
+ * This software is licensed under terms that can be found in the LICENSE file
+ * in the root directory of this software component.
+ * If no LICENSE file comes with this software, it is provided AS-IS.
+ *
+ ******************************************************************************
+ */
 /* USER CODE END Header */
 
 /* Includes ------------------------------------------------------------------*/
@@ -45,14 +45,16 @@
 
 /* Private variables ---------------------------------------------------------*/
 /* USER CODE BEGIN Variables */
-
+float Target;
+float Current;
+extern const RC_ctrl_t *local_rc_ctrl;
 /* USER CODE END Variables */
 /* Definitions for motorTask */
 osThreadId_t motorTaskHandle;
 const osThreadAttr_t motorTask_attributes = {
-  .name = "motorTask",
-  .stack_size = 128 * 4,
-  .priority = (osPriority_t) osPriorityNormal,
+    .name = "motorTask",
+    .stack_size = 128 * 4,
+    .priority = (osPriority_t)osPriorityNormal,
 };
 
 /* Private function prototypes -----------------------------------------------*/
@@ -65,11 +67,12 @@ void MotorTask(void *argument);
 void MX_FREERTOS_Init(void); /* (MISRA C 2004 rule 8.1) */
 
 /**
-  * @brief  FreeRTOS initialization
-  * @param  None
-  * @retval None
-  */
-void MX_FREERTOS_Init(void) {
+ * @brief  FreeRTOS initialization
+ * @param  None
+ * @retval None
+ */
+void MX_FREERTOS_Init(void)
+{
   /* USER CODE BEGIN Init */
 
   /* USER CODE END Init */
@@ -101,23 +104,34 @@ void MX_FREERTOS_Init(void) {
   /* USER CODE BEGIN RTOS_EVENTS */
   /* add events, ... */
   /* USER CODE END RTOS_EVENTS */
-
 }
 
 /* USER CODE BEGIN Header_MotorTask */
 /**
-  * @brief  Function implementing the motorTask thread.
-  * @param  argument: Not used
-  * @retval None
-  */
+ * @brief  Function implementing the motorTask thread.
+ * @param  argument: Not used
+ * @retval None
+ */
 /* USER CODE END Header_MotorTask */
 void MotorTask(void *argument)
 {
   /* USER CODE BEGIN MotorTask */
+  int16_t Torque;
+  PID_Controller PID_Speed = {45, 15, 0};
+  PID_Speed.i_out = 0;
+  PID_Speed.i_max = 15000;
   /* Infinite loop */
-  for(;;)
+  for (;;)
   {
-    osDelay(1);
+    Target = local_rc_ctrl->rc.ch[1] / 2.f;
+    float now_omega = Tx_Data[1];
+    // Current = now_omega * 2.0f * PI / 60.0f;
+    Current = now_omega;
+    Torque = PID_Calc(&PID_Speed, Current, Target);
+    CAN1_0x1ff_Tx_Data[0] = Torque >> 8;
+    CAN1_0x1ff_Tx_Data[1] = Torque;
+    CANx_SendData(&hcan1, 0x1ff, CAN1_0x1ff_Tx_Data, 8);
+    osDelay(5);
   }
   /* USER CODE END MotorTask */
 }
@@ -126,4 +140,3 @@ void MotorTask(void *argument)
 /* USER CODE BEGIN Application */
 
 /* USER CODE END Application */
-
