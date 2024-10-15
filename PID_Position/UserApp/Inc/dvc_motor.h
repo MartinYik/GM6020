@@ -36,13 +36,10 @@ extern "C"
 	{
 		int16_t Rx_Encoder, Rx_RPM, Rx_Torque, Rx_Temp;
 		// 之前的编码器位置
-		// uint16_t Pre_Encoder;
 		int16_t Pre_Encoder;
 		// 总编码器位置
-		// int32_t Total_Encoder;
 		int16_t Total_Encoder;
 		// 总圈数
-		// int32_t Total_Round;
 		int16_t Total_Round;
 	} Motor_GM6020;
 

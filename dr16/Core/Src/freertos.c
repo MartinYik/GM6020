@@ -45,8 +45,12 @@
 
 /* Private variables ---------------------------------------------------------*/
 /* USER CODE BEGIN Variables */
+int16_t Torque = 0;
+uint8_t motor_flag;
 float Target;
 float Current;
+extern int rc_flag;
+extern int last_rc_flag;
 extern const RC_ctrl_t *local_rc_ctrl;
 /* USER CODE END Variables */
 /* Definitions for motorTask */
@@ -56,6 +60,13 @@ const osThreadAttr_t motorTask_attributes = {
     .stack_size = 128 * 4,
     .priority = (osPriority_t)osPriorityNormal,
 };
+/* Definitions for rcTask */
+osThreadId_t rcTaskHandle;
+const osThreadAttr_t rcTask_attributes = {
+    .name = "rcTask",
+    .stack_size = 128 * 4,
+    .priority = (osPriority_t)osPriorityLow,
+};
 
 /* Private function prototypes -----------------------------------------------*/
 /* USER CODE BEGIN FunctionPrototypes */
@@ -63,6 +74,7 @@ const osThreadAttr_t motorTask_attributes = {
 /* USER CODE END FunctionPrototypes */
 
 void MotorTask(void *argument);
+void RCTask(void *argument);
 
 void MX_FREERTOS_Init(void); /* (MISRA C 2004 rule 8.1) */
 
@@ -97,6 +109,9 @@ void MX_FREERTOS_Init(void)
   /* creation of motorTask */
   motorTaskHandle = osThreadNew(MotorTask, NULL, &motorTask_attributes);
 
+  /* creation of rcTask */
+  rcTaskHandle = osThreadNew(RCTask, NULL, &rcTask_attributes);
+
   /* USER CODE BEGIN RTOS_THREADS */
   /* add threads, ... */
   /* USER CODE END RTOS_THREADS */
@@ -116,24 +131,55 @@ void MX_FREERTOS_Init(void)
 void MotorTask(void *argument)
 {
   /* USER CODE BEGIN MotorTask */
-  int16_t Torque;
   PID_Controller PID_Speed = {45, 15, 0};
   PID_Speed.i_out = 0;
   PID_Speed.i_max = 15000;
   /* Infinite loop */
   for (;;)
   {
-    Target = local_rc_ctrl->rc.ch[1] / 2.f;
-    float now_omega = Tx_Data[1];
-    // Current = now_omega * 2.0f * PI / 60.0f;
-    Current = now_omega;
-    Torque = PID_Calc(&PID_Speed, Current, Target);
+    if (motor_flag == 1)
+    {
+      Torque = 0;
+    }
+    else
+    {
+      Torque = 0;
+    }
+
     CAN1_0x1ff_Tx_Data[0] = Torque >> 8;
     CAN1_0x1ff_Tx_Data[1] = Torque;
     CANx_SendData(&hcan1, 0x1ff, CAN1_0x1ff_Tx_Data, 8);
     osDelay(5);
   }
   /* USER CODE END MotorTask */
+}
+
+/* USER CODE BEGIN Header_RCTask */
+/**
+ * @brief Function implementing the rcTask thread.
+ * @param argument: Not used
+ * @retval None
+ */
+/* USER CODE END Header_RCTask */
+void RCTask(void *argument)
+{
+  /* USER CODE BEGIN RCTask */
+  /* Infinite loop */
+  for (;;)
+  {
+    if (last_rc_flag == rc_flag)
+    {
+      Torque = 0;
+      motor_flag = 0;
+    }
+    else
+    {
+      motor_flag = 1;
+    }
+    last_rc_flag = rc_flag;
+    osDelay(100);
+  }
+  /* USER CODE END RCTask */
 }
 
 /* Private application code --------------------------------------------------*/
