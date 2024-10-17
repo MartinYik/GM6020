@@ -77,15 +77,15 @@ void CAN_Filter_Mask_Config(CAN_HandleTypeDef *hcan, uint8_t Object_Para, uint32
 {
     CAN_FilterTypeDef can_filter_init_structure;
 
-    //检测传参是否正确
+    // 检测传参是否正确
     assert_param(hcan != NULL);
 
     if ((Object_Para & 0x02))
     {
-        //数据帧
-        //掩码后ID的高16bit
+        // 数据帧
+        // 掩码后ID的高16bit
         can_filter_init_structure.FilterIdHigh = ID << 3 << 16;
-        //掩码后ID的低16bit
+        // 掩码后ID的低16bit
         can_filter_init_structure.FilterIdLow = ID << 3 | ((Object_Para & 0x03) << 1);
         // ID掩码值高16bit
         can_filter_init_structure.FilterMaskIdHigh = Mask_ID << 3 << 16;
@@ -94,27 +94,27 @@ void CAN_Filter_Mask_Config(CAN_HandleTypeDef *hcan, uint8_t Object_Para, uint32
     }
     else
     {
-        //其他帧
-        //掩码后ID的高16bit
+        // 其他帧
+        // 掩码后ID的高16bit
         can_filter_init_structure.FilterIdHigh = ID << 5;
-        //掩码后ID的低16bit
+        // 掩码后ID的低16bit
         can_filter_init_structure.FilterIdLow = ((Object_Para & 0x03) << 1);
         // ID掩码值高16bit
         can_filter_init_structure.FilterMaskIdHigh = Mask_ID << 5;
         // ID掩码值低16bit
         can_filter_init_structure.FilterMaskIdLow = ((Object_Para & 0x03) << 1);
     }
-    //滤波器序号, 0-27, 共28个滤波器, 前14个在CAN1, 后14个在CAN2
+    // 滤波器序号, 0-27, 共28个滤波器, 前14个在CAN1, 后14个在CAN2
     can_filter_init_structure.FilterBank = Object_Para >> 3;
-    //滤波器绑定FIFO0
+    // 滤波器绑定FIFO0
     can_filter_init_structure.FilterFIFOAssignment = (Object_Para >> 2) & 0x01;
-    //使能滤波器
+    // 使能滤波器
     can_filter_init_structure.FilterActivation = ENABLE;
-    //滤波器模式，设置ID掩码模式
+    // 滤波器模式，设置ID掩码模式
     can_filter_init_structure.FilterMode = CAN_FILTERMODE_IDMASK;
     // 32位滤波
     can_filter_init_structure.FilterScale = CAN_FILTERSCALE_32BIT;
-    //从机模式选择开始单元
+    // 从机模式选择开始单元
     can_filter_init_structure.SlaveStartFilterBank = 14;
 
     HAL_CAN_ConfigFilter(hcan, &can_filter_init_structure);
@@ -134,7 +134,7 @@ uint8_t CAN_Send_Data(CAN_HandleTypeDef *hcan, uint16_t ID, uint8_t *Data, uint1
     CAN_TxHeaderTypeDef tx_header;
     uint32_t used_mailbox;
 
-    //检测传参是否正确
+    // 检测传参是否正确
     assert_param(hcan != NULL);
 
     tx_header.StdId = ID;
@@ -159,12 +159,12 @@ void TIM_CAN_PeriodElapsedCallback()
     // CAN1电机
     CAN_Send_Data(&hcan1, 0x1ff, CAN1_0x1ff_Tx_Data, 8);
     CAN_Send_Data(&hcan1, 0x200, CAN1_0x200_Tx_Data, 8);
-    // CAN_Send_Data(&hcan1, 0x2ff, CAN1_0x2ff_Tx_Data, 8);
+    CAN_Send_Data(&hcan1, 0x2ff, CAN1_0x2ff_Tx_Data, 8);
 
     // CAN2电机
-    // CAN_Send_Data(&hcan2, 0x1ff, CAN2_0x1ff_Tx_Data, 8);
-    // CAN_Send_Data(&hcan2, 0x200, CAN2_0x200_Tx_Data, 8);
-    // CAN_Send_Data(&hcan2, 0x2ff, CAN2_0x2ff_Tx_Data, 8);
+    CAN_Send_Data(&hcan2, 0x1ff, CAN2_0x1ff_Tx_Data, 8);
+    CAN_Send_Data(&hcan2, 0x200, CAN2_0x200_Tx_Data, 8);
+    CAN_Send_Data(&hcan2, 0x2ff, CAN2_0x2ff_Tx_Data, 8);
 
     if (mod10 == 10 - 1)
     {
@@ -181,7 +181,7 @@ void TIM_CAN_PeriodElapsedCallback()
  */
 void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan)
 {
-    //选择回调函数
+    // 选择回调函数
     if (hcan->Instance == CAN1)
     {
         HAL_CAN_GetRxMessage(hcan, CAN_FILTER_FIFO0, &CAN1_Manage_Object.Rx_Buffer.Header, CAN1_Manage_Object.Rx_Buffer.Data);
@@ -201,7 +201,7 @@ void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan)
  */
 void HAL_CAN_RxFifo1MsgPendingCallback(CAN_HandleTypeDef *hcan)
 {
-    //选择回调函数
+    // 选择回调函数
     if (hcan->Instance == CAN1)
     {
         HAL_CAN_GetRxMessage(hcan, CAN_FILTER_FIFO1, &CAN1_Manage_Object.Rx_Buffer.Header, CAN1_Manage_Object.Rx_Buffer.Data);

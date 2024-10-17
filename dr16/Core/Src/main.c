@@ -72,7 +72,7 @@ void CAN_Motor_Call_Back(CAN_RxBuffer *Rx_Buffer)
   uint8_t *Rx_Data = Rx_Buffer->data;
   switch (Rx_Buffer->header.StdId)
   {
-  case (0x205):
+  case (0x209):
   {
     Tx_Data[0] = (Rx_Data[0] << 8) | Rx_Data[1];
     Tx_Data[1] = (Rx_Data[2] << 8) | Rx_Data[3];
@@ -115,13 +115,14 @@ int main(void)
   MX_DMA_Init();
   MX_USART2_UART_Init();
   MX_CAN1_Init();
-  MX_USART1_UART_Init();
+  MX_CAN2_Init();
+  MX_UART4_Init();
   /* USER CODE BEGIN 2 */
-  CAN_Init(&hcan1, CAN_Motor_Call_Back);
+  CAN_Init(&hcan2, CAN_Motor_Call_Back);
   remote_control_init();
-  Uart_Init(&huart1, NULL, 0, NULL);
+  Uart_Init(&huart4, NULL, 0, NULL);
   local_rc_ctrl = get_remote_control_point();
-  CAN_Filter_Mask_Config(&hcan1, CanFilter(13) | CanFifo_1 | Can_STDID | Can_DataType, 0x205, 0x7FF);
+  CAN_Filter_Mask_Config(&hcan2, CanFilter(24) | CanFifo_1 | Can_STDID | Can_DataType, 0x209, 0x3FF);
   /* USER CODE END 2 */
 
   /* Init scheduler */
@@ -139,7 +140,7 @@ int main(void)
 
     /* USER CODE BEGIN 3 */
     sprintf(str, "**********\r\n ch0:%d\r\n ch1:%d\r\n ch2:%d\r\n ch3:%d\r\n ch4:%d\r\n s1:%d\r\n s2:%d\r\n **********\r\n", local_rc_ctrl->rc.ch[0], local_rc_ctrl->rc.ch[1], local_rc_ctrl->rc.ch[2], local_rc_ctrl->rc.ch[3], local_rc_ctrl->rc.ch[4], local_rc_ctrl->rc.s[0], local_rc_ctrl->rc.s[1]);
-    HAL_UART_Transmit(&huart1, (uint8_t *)str, strlen(str), HAL_MAX_DELAY);
+    HAL_UART_Transmit(&huart4, (uint8_t *)str, strlen(str), HAL_MAX_DELAY);
     HAL_Delay(1000);
   }
   /* USER CODE END 3 */

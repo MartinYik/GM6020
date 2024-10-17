@@ -1,339 +1,287 @@
 /**
-  ******************************************************************************
-  * Copyright (c) 2019 - ~, SCUT-RobotLab Development Team
-  * @file    dr16.cpp
-  * @author  Zelong.Xu (8762322@qq.com)
-  * @brief   Code for DJI-DR16 driver in embedded software system.
-  * @date    2021-04-07
-  * @version 3.0
-  * @par Change Log£º
-  * <table>
-  * <tr><th>Date        <th>Version  <th>Author    		<th>Description
-  * <tr><td>2019-04-00  <td> 2.0     <td>YuyongHu     <td>Creator
-  * <tr><td>2019-11-08  <td> 2.1     <td>Zelong.Xu    <td>Re-format for API.
-  * <tr><td>2021-04-07  <td> 3.0     <td>M3chD09      <td>Add DR16 prefix for enum API.
-  * </table>
-  *
-  ==============================================================================
-                            How to use this driver     
-  ==============================================================================
-    @note 
-      -# ÊµÀı»¯DR16_ClassdefÀà
-      -# µ÷ÓÃCheck_Link()½øĞĞDR16ÔÚÏß¼ì²é
-      -# Í¨¹ı´®¿Ú½ÓÊÕDR16´«À´µÄÊı¾İ£¬²¢´«ÈëDataCapture()´¦Àí
-      -# ĞèÒªÊ±µ÷ÓÃ¸÷Í¨µÀ»ñÈ¡º¯Êı»ñÈ¡Êı¾İ£¬»òÕß»ñÈ¡½ÓÊÕ»úµÄÁ¬½Ó×´Ì¬
+ * @file DR16.cpp
+ * @author yssickjgd (1345578933@qq.com)
+ * @brief é¥æ§å™¨DR16
+ * @version 0.1
+ * @date 2023-08-29 0.1 23èµ›å­£å®šç¨¿
+ *
+ * @copyright USTC-RoboWalker (c) 2023
+ *
+ */
 
-  ******************************************************************************
-  * @attention
-  * 
-  * if you had modified this file, please make sure your code does not have any 
-  * bugs, update the version Number, write dowm your name and the date. The most
-  * important thing is make sure the users will have clear and definite under-
-  * standing through your new brief.
-  *
-  * <h2><center>&copy; Copyright (c) 2019 - ~, SCUT-RobotLab Development Team.
-  * All rights reserved.</center></h2>
-  ******************************************************************************
-  */
+/* Includes ------------------------------------------------------------------*/
 
-/* Includes ------------------------------------------------------------------*/ 
 #include "dr16.h"
 
+/* Private macros ------------------------------------------------------------*/
+
+/* Private types -------------------------------------------------------------*/
+
+/* Private variables ---------------------------------------------------------*/
+
 /* Private function declarations ---------------------------------------------*/
-float DeadZone_Process(float num,float DZ_min, float DZ_max, float DZ_num);
-/* function prototypes -------------------------------------------------------*/
+
+/* Function prototypes -------------------------------------------------------*/
+
 /**
-    * @brief  Initialize DR16 Class
-    * @param  None
-    * @retval None
-    */
-DR16_Classdef::DR16_Classdef()
+ * @brief é¥æ§å™¨DR16åˆå§‹åŒ–
+ *
+ * @param huart æŒ‡å®šçš„UART
+ */
+void Class_DR16::Init(UART_HandleTypeDef *huart)
 {
-    MouseCoefficient = 128;      //Êó±êÏµÊı³õÊ¼»¯
-    Status = DR16_LOST;    //×´Ì¬³õÊ¼»¯
-    for(short i=0;i<16;i++)      //¼üÖµ³õÊ¼»¯
+    if (huart->Instance == USART1)
     {
-        Key[i].isPressed=false;
-        Key[i].isTriggered=false;
+        UART_Manage_Object = &UART1_Manage_Object;
     }
-    //Ò¡¸ËÖµ³õÊ¼»¯
-    DataPack.ch0 = 1024;
-    DataPack.ch1 = 1024;
-    DataPack.ch2 = 1024;
-    DataPack.ch3 = 1024;
-}
-
-/**
- * @brief  »ñÈ¡Êı¾İ°üº¯Êı£¬½«DR16½ÓÊÕÆ÷ÊÕµ½µÄÊı¾İ°üµÄÖµ¸³¸øDR16µÄ³ÉÔ±±äÁ¿DataPack²¢½øĞĞ¼üÅÌ°´¼üÏû¶¶´¦Àí
- * @param  captureData:ÊÕµ½µÄÊı¾İ°üÖ¸Õë
- * @return None.
- */
-void DR16_Classdef::DataCapture(DR16_DataPack_Typedef* captureData)
-{
-    DataPack = *captureData; 
-
-    /*ÉèÖÃÔÚÏß£¬¿ªÊ¼ÔÙ´Î¼ì²âÁ¬½Ó*/
-    last_check_time = 0;
-    Status = DR16_ESTABLISHED;
-
-    /*¸÷ÔÓÆßÔÓ°ËÍ¨µÀÖµ¹éÒ»»¯´¦Àí*/
-    RX_Norm = DeadZone_Process((float)(DataPack.ch0-1024)/660.0f,-Ignore_Limit,Ignore_Limit,0);
-    RY_Norm = DeadZone_Process((float)(DataPack.ch1-1024)/660.0f,-Ignore_Limit,Ignore_Limit,0);
-    LX_Norm = DeadZone_Process((float)(DataPack.ch2-1024)/660.0f,-Ignore_Limit,Ignore_Limit,0);
-    LY_Norm = DeadZone_Process((float)(DataPack.ch3-1024)/660.0f,-Ignore_Limit,Ignore_Limit,0);
-
-    float temp;
-
-    temp = MouseCoefficient*((float)DataPack.x)/32768.0f;
-    temp=temp>1?1:temp;
-    temp=temp<-1?-1:temp;
-    MouseX_Norm = temp;
-    
-    temp = MouseCoefficient*((float)DataPack.y)/32768.0f;
-    temp=temp>1?1:temp;
-    temp=temp<-1?-1:temp;
-    MouseY_Norm = temp;
-
-    
-    temp = MouseCoefficient*((float)DataPack.z)/32768.0f;
-    temp=temp>1?1:temp;
-    temp=temp<-1?-1:temp;
-    MouseZ_Norm = temp;
-
-    /*°´¼ü´¦Àí*/
-    Key_Process();
-}
-
-/**
- * @brief  °´¼ü´¦Àí Key Process
- * @param  None
- * @return None
- */
-void DR16_Classdef::Key_Process(void)
-{
-    for(short i=0;i<16;i++)
+    else if (huart->Instance == USART2)
     {
-        //¼ì²âµ½¶ÔÓ¦°´¼ü°´ÏÂ¾ÍÖÃkey½á¹¹Êı×éÏà¹ØÎ»
-        if(DataPack.key & (0x01<<i)) 
-            Key[i].isPressed = true;
-        else
+        UART_Manage_Object = &UART2_Manage_Object;
+    }
+    else if (huart->Instance == USART3)
+    {
+        UART_Manage_Object = &UART3_Manage_Object;
+    }
+    else if (huart->Instance == UART4)
+    {
+        UART_Manage_Object = &UART4_Manage_Object;
+    }
+    else if (huart->Instance == UART5)
+    {
+        UART_Manage_Object = &UART5_Manage_Object;
+    }
+    else if (huart->Instance == USART6)
+    {
+        UART_Manage_Object = &UART6_Manage_Object;
+    }
+}
+
+/**
+ * @brief UARTé€šä¿¡æ¥æ”¶å›è°ƒå‡½æ•°
+ *
+ * @param Rx_Data æ¥æ”¶çš„æ•°æ®
+ */
+void Class_DR16::UART_RxCpltCallback(uint8_t *Rx_Data, uint16_t Length)
+{
+    // æ»‘åŠ¨çª—å£, åˆ¤æ–­é¥æ§å™¨DR16æ˜¯å¦åœ¨çº¿
+    Flag += 1;
+
+    Data_Process(Length);
+}
+
+/**
+ * @brief TIMå®šæ—¶å™¨ä¸­æ–­å®šæœŸæ£€æµ‹é¥æ§å™¨DR16æ˜¯å¦å­˜æ´»
+ *
+ */
+void Class_DR16::TIM_100ms_Alive_PeriodElapsedCallback()
+{
+    // åˆ¤æ–­è¯¥æ—¶é—´æ®µå†…æ˜¯å¦æ¥æ”¶è¿‡é¥æ§å™¨DR16æ•°æ®
+    if (Flag == Pre_Flag)
+    {
+        // é¥æ§å™¨DR16æ–­å¼€è¿æ¥
+        DR16_Status = DR16_Status_DISABLE;
+
+        UART_Reinit(UART_Manage_Object->UART_Handler);
+    }
+    else
+    {
+        // é¥æ§å™¨DR16ä¿æŒè¿æ¥
+        DR16_Status = DR16_Status_ENABLE;
+    }
+    Pre_Flag = Flag;
+}
+
+/**
+ * @brief å®šæ—¶å™¨è®¡ç®—å‡½æ•°
+ *
+ */
+void Class_DR16::TIM_1ms_Calculate_PeriodElapsedCallback()
+{
+    // æ•°æ®å¤„ç†è¿‡ç¨‹
+    Struct_DR16_UART_Data *tmp_buffer = (Struct_DR16_UART_Data *)UART_Manage_Object->Rx_Buffer;
+
+    // åˆ¤æ–­æ‹¨ç è§¦å‘
+    _Judge_Switch(&Data.Left_Switch, tmp_buffer->Switch_1, Pre_UART_Rx_Data.Switch_1);
+    _Judge_Switch(&Data.Right_Switch, tmp_buffer->Switch_2, Pre_UART_Rx_Data.Switch_2);
+
+    // åˆ¤æ–­é¼ æ ‡è§¦å‘
+    _Judge_Key(&Data.Mouse_Left_Key, tmp_buffer->Mouse_Left_Key, Pre_UART_Rx_Data.Mouse_Left_Key);
+    _Judge_Key(&Data.Mouse_Right_Key, tmp_buffer->Mouse_Right_Key, Pre_UART_Rx_Data.Mouse_Right_Key);
+
+    // åˆ¤æ–­é”®ç›˜è§¦å‘
+    for (int i = 0; i < 16; i++)
+    {
+        _Judge_Key(&Data.Keyboard_Key[i], ((tmp_buffer->Keyboard_Key) >> i) & 0x1, ((Pre_UART_Rx_Data.Keyboard_Key) >> i) & 0x1);
+    }
+
+    // ä¿ç•™æ•°æ®
+    memcpy(&Pre_UART_Rx_Data, tmp_buffer, 18 * sizeof(uint8_t));
+}
+
+/**
+ * @brief æ•°æ®å¤„ç†è¿‡ç¨‹
+ *
+ */
+void Class_DR16::Data_Process(uint16_t Length)
+{
+    // æ•°æ®å¤„ç†è¿‡ç¨‹
+    Struct_DR16_UART_Data *tmp_buffer = (Struct_DR16_UART_Data *)UART_Manage_Object->Rx_Buffer;
+
+    // æ‘‡æ†ä¿¡æ¯
+    Data.Right_X = (tmp_buffer->Channel_0 - Rocker_Offset) / Rocker_Num;
+    Data.Right_Y = (tmp_buffer->Channel_1 - Rocker_Offset) / Rocker_Num;
+    Data.Left_X = (tmp_buffer->Channel_2 - Rocker_Offset) / Rocker_Num;
+    Data.Left_Y = (tmp_buffer->Channel_3 - Rocker_Offset) / Rocker_Num;
+
+    // é¼ æ ‡ä¿¡æ¯
+    Data.Mouse_X = tmp_buffer->Mouse_X / 32768.0f;
+    Data.Mouse_Y = tmp_buffer->Mouse_Y / 32768.0f;
+    Data.Mouse_Z = tmp_buffer->Mouse_Z / 32768.0f;
+
+    // å·¦å‰è½®ä¿¡æ¯
+    Data.Yaw = (tmp_buffer->Channel_Yaw - Rocker_Offset) / Rocker_Num;
+}
+
+/**
+ * @brief åˆ¤æ–­æ‹¨åŠ¨å¼€å…³çŠ¶æ€
+ *
+ */
+void Class_DR16::_Judge_Switch(Enum_DR16_Switch_Status *Switch, uint8_t Status, uint8_t Pre_Status)
+{
+    // å¸¦è§¦å‘çš„åˆ¤æ–­
+    switch (Pre_Status)
+    {
+    case (DR16_SWITCH_UP):
+    {
+        switch (Status)
         {
-            Key[i].isPressed = false;
-            Key[i].isTriggered = false;
-        }
-    }
-    //Êó±ê×óÓÒ¼ü´¦Àí
-    if(DataPack.press_l == 0x01)
-        Key[DR16_MOUSE_L].isPressed = true;
-    else
-    {
-        Key[DR16_MOUSE_L].isPressed = false;
-        Key[DR16_MOUSE_L].isTriggered = false;
-    }
-    if(DataPack.press_r == 0x01)
-        Key[DR16_MOUSE_R].isPressed = true;
-    else
-    {
-        Key[DR16_MOUSE_R].isPressed = false;
-        Key[DR16_MOUSE_R].isTriggered = false;
-    }
-}
-
-/**
- * @brief  ×¢²á°´¼ü»Øµ÷º¯Êı
- * @param  _Key °´ÏÂµÄ°´¼ü
- * @param  Fun_Ptr ¶ÔÓ¦°´¼üÒª»Øµ÷µÄº¯Êı
- * @return None
- */
-void DR16_Classdef::Register_Click_Fun(int _Key, CLICK_EXCE Fun_Ptr)
-{
-    Click_Fun[_Key] = Fun_Ptr;
-}
-
-/**
- * @brief  °´¼ü»Øµ÷º¯Êı
- * @param  None
- * @return None
- */
-void DR16_Classdef::Exce_Click_Fun()
-{
-    for(size_t i = 0; i < 18; i++)
-    {
-        if(Click_Fun[i]!= NULL &&IsKeyPress(i)&&!IsKeyPress(DR16_KEY_CTRL))
+        case (DR16_SWITCH_UP):
         {
-            if(!Key[i].isTriggered)
-            {
-            Key[i].isTriggered = 1;
-            Click_Fun[i]();
-            }
+            *Switch = DR16_Switch_Status_UP;
+
+            break;
         }
+        case (DR16_SWITCH_DOWN):
+        {
+            *Switch = DR16_Switch_Status_TRIG_MIDDLE_DOWN;
+
+            break;
+        }
+        case (DR16_SWITCH_MIDDLE):
+        {
+            *Switch = DR16_Switch_Status_TRIG_UP_MIDDLE;
+
+            break;
+        }
+        }
+
+        break;
     }
-}
-
-/**
- * @brief  ÒÔÏÂGetxxxº¯Êı¹¦ÄÜ¶¼ÊÇ»ñµÃÊı¾İ°üÖĞµÄGetºóÃæÊı¾İµÄÖµ¡£
- * @param  None
- * @return GetºóÃæµÄÊı¾İµÄÖµ
- */
-uint64_t DR16_Classdef::GetCh0(void)
-{
-    return DataPack.ch0;
-}
-
-uint64_t DR16_Classdef::GetCh1(void)
-{
-    return DataPack.ch1;
-}
-
-
-uint64_t DR16_Classdef::GetCh2(void)
-{
-    return DataPack.ch2;
-}
-
-
-uint64_t DR16_Classdef::GetCh3(void)
-{
-    return DataPack.ch3;
-}
-
-SW_Status_Typedef DR16_Classdef::GetS2(void)
-{
-    return (SW_Status_Typedef)DataPack.s2;
-}
-SW_Status_Typedef DR16_Classdef::GetS1(void)
-{
-    return (SW_Status_Typedef)DataPack.s1;
-}
-int64_t DR16_Classdef::GetMouseX(void)
-{
-    return DataPack.x;
-}
-int64_t DR16_Classdef::GetMouseY(void)
-{
-    return DataPack.y;
-}
-int64_t DR16_Classdef::GetMouseZ(void)
-{
-    return DataPack.z;
-}
-uint64_t DR16_Classdef::GetPress_L(void)
-{
-    return DataPack.press_l;
-}
-uint64_t DR16_Classdef::GetPress_R(void)
-{
-	return DataPack.press_r;
-}
-uint64_t DR16_Classdef::Getkey(void)
-{
-    return DataPack.key;
-}
-/**
- * @brief  ¹éÒ»»¯ºóµÄÍ¨µÀ0123¡¢Êó±êXYZÖµ(Left_X_Axis,Right_Y_Axis,balabala)
- * @param  None
- * @retval -1~1Ö®¼äµÄÍ¨µÀÖµ
- */
-float DR16_Classdef::Get_RX_Norm(void)
-{
-    return RX_Norm;
-}
-float DR16_Classdef::Get_RY_Norm(void)
-{
-    return RY_Norm;
-}
-float DR16_Classdef::Get_LX_Norm(void)
-{
-    return LX_Norm;
-}
-float DR16_Classdef::Get_LY_Norm(void)
-{
-    return LY_Norm;
-}
-float DR16_Classdef::Get_MouseX_Norm(void)
-{
-    return MouseX_Norm;
-}
-float DR16_Classdef::Get_MouseY_Norm(void)
-{
-    return MouseY_Norm;
-}
-float DR16_Classdef::Get_MouseZ_Norm(void)
-{
-    return MouseZ_Norm;
-}
-
-/**
- * @brief  ÓÃÓÚÅĞ¶ÏÄ³¸ö°´¼üÊÇ·ñ°´ÏÂ,×éºÏ¼üÁ¢ÂíÅĞ¶Ï
- * @param  _key Í·ÎÄ¼şÖĞºê¶¨ÒåµÄkey¼ü£¬Èç_w,_sµÈ
- * @retval °´ÏÂÎªture£¬Ã»°´ÏÂÎªfalse
- */
-bool DR16_Classdef::IsKeyPress(int _key)
-{
-    return Key[_key].isPressed;
-}
-
-/**
- * @brief   µÃµ½DR16³ÉÔ±±äÁ¿statusµÄÖµ£¬³£ÓÃÓÚÅĞ¶ÏDR16ÊÇ·ñÔÚÏß
- * @param   None
- * @return  Connection_Lost         DR16ÀëÏß  
- * @return  Connection_Established  DR16ÔÚÏß
- */
-LinkageStatus_Typedef DR16_Classdef::GetStatus(void)
-{
-  return Status;
-}
-
-
-/**
-* @brief  Á¬½ÓÈ·ÈÏ£¬¸üĞÂÉè±¸µÄÁ¬½Ó×´Ì¬¡£Ã¿100msÄÚÃ»ÓĞµ÷ÓÃDataCapture()½«
-*         ½øÈëÀëÏßÄ£Ê½¡£
-* @param  current_check_time µ±Ç°ÏµÍ³Ê±¼ä£¨ºÁÃë£©.
-* @return None
-*/
-void DR16_Classdef::Check_Link(uint32_t current_check_time)
-{
-  static uint32_t dt = 0;
-
-  /*¿ªÊ¼¼ì²â*/
-  if(last_check_time == 0)
-  {
-    last_check_time = current_check_time;
-  }
-  else
-  {
-      dt = current_check_time - last_check_time;
-      if (dt > 100)
-      {
-          /*Ê±ÖÓ¼ÆÊ±Òç³ö*/
-          if (dt > 1000)
-              last_check_time = 0;
-          /*Ã¿100ms²»ÖÃÎ»¾ÍÈÏÎªµôÏß*/
-          else
-              Status = DR16_LOST;
-
-          /*ÖØĞÂ¿ªÊ¼¼ì²â*/
-          last_check_time = 0;
-      }
-      else {}
-  }
-}
-
-/**
- * @brief  ËÀÇø´¦Àí£¬³£ÓÃÓÚÏû³ıÁãµã¸½½üµÄÎ¢Ğ¡Îó²î
- * @param  num:Òª´¦ÀíµÄÊı; DZ_min,DZ_max:ËÀÇø·¶Î§;DZ_num:ÂäÔÚËÀÇøÄÚÊ±·µ»ØµÄÖµ
- * @return ´¦ÀíºóµÄ½á¹û
- */
-float DeadZone_Process(float num,float DZ_min, float DZ_max, float DZ_num)
-{
-    //ÈôÔÚËÀÇøÄÚÔò·µ»ØËÀÇøÖµ
-    if(num<DZ_max&&num>DZ_min)
+    case (DR16_SWITCH_DOWN):
     {
-        return DZ_num;
+        switch (Status)
+        {
+        case (DR16_SWITCH_UP):
+        {
+            *Switch = DR16_Switch_Status_TRIG_MIDDLE_UP;
+
+            break;
+        }
+        case (DR16_SWITCH_DOWN):
+        {
+            *Switch = DR16_Switch_Status_DOWN;
+
+            break;
+        }
+        case (DR16_SWITCH_MIDDLE):
+        {
+            *Switch = DR16_Switch_Status_TRIG_DOWN_MIDDLE;
+
+            break;
+        }
+        }
+
+        break;
     }
-    else
-        return num;
+    case (DR16_SWITCH_MIDDLE):
+    {
+        switch (Status)
+        {
+        case (DR16_SWITCH_UP):
+        {
+            *Switch = DR16_Switch_Status_TRIG_MIDDLE_UP;
+
+            break;
+        }
+        case (DR16_SWITCH_DOWN):
+        {
+            *Switch = DR16_Switch_Status_TRIG_MIDDLE_DOWN;
+
+            break;
+        }
+        case (DR16_SWITCH_MIDDLE):
+        {
+            *Switch = DR16_Switch_Status_MIDDLE;
+
+            break;
+        }
+        }
+
+        break;
+    }
+    }
 }
 
+/**
+ * @brief åˆ¤æ–­æŒ‰é”®çŠ¶æ€
+ *
+ */
+void Class_DR16::_Judge_Key(Enum_DR16_Key_Status *Key, uint8_t Status, uint8_t Pre_Status)
+{
+    // å¸¦è§¦å‘çš„åˆ¤æ–­
+    switch (Pre_Status)
+    {
+    case (DR16_KEY_FREE):
+    {
+        switch (Status)
+        {
+        case (DR16_KEY_FREE):
+        {
+            *Key = DR16_Key_Status_FREE;
 
-/************************ COPYRIGHT(C) SCUT-ROBOTLAB **************************/
+            break;
+        }
+        case (DR16_KEY_PRESSED):
+        {
+            *Key = DR16_Key_Status_TRIG_FREE_PRESSED;
+
+            break;
+        }
+        }
+
+        break;
+    }
+    case (DR16_KEY_PRESSED):
+    {
+        switch (Status)
+        {
+        case (DR16_KEY_FREE):
+        {
+            *Key = DR16_Key_Status_TRIG_PRESSED_FREE;
+
+            break;
+        }
+        case (DR16_KEY_PRESSED):
+        {
+            *Key = DR16_Key_Status_PRESSED;
+
+            break;
+        }
+        }
+
+        break;
+    }
+    }
+}
+
+/************************ COPYRIGHT(C) USTC-ROBOWALKER **************************/

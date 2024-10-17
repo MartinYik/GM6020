@@ -25,7 +25,7 @@
 #define CAN_FIFO_0 (0 << 2)
 #define CAN_FIFO_1 (1 << 2)
 
-//标准帧或扩展帧
+// 标准帧或扩展帧
 #define CAN_STDID (0 << 1)
 #define CAN_EXTID (1 << 1)
 

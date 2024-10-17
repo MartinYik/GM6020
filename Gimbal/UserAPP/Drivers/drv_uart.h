@@ -1,11 +1,13 @@
 /**
  * @file drv_uart.h
  * @author yssickjgd (1345578933@qq.com)
- * @brief ·ÂÕÕSCUT-Robotlab¸ÄĞ´µÄUARTÍ¨ĞÅ³õÊ¼»¯ÓëÅäÖÃÁ÷³Ì
+ * @brief ä»¿ç…§SCUT-Robotlabæ”¹å†™çš„UARTé€šä¿¡åˆå§‹åŒ–ä¸é…ç½®æµç¨‹
  * @version 0.1
- * @date 2022-08-05
+ * @date 2023-08-29 0.1 23èµ›å­£å®šç¨¿
+ * @date 2023-11-18 1.1 ä¿®æ”¹æˆcpp
+ * @date 2024-05-05 1.2 æ–°å¢é”™è¯¯ä¸­æ–­
  *
- * @copyright USTC-RoboWalker (c) 2022
+ * @copyright USTC-RoboWalker (c) 2023-2024
  *
  */
 
@@ -15,22 +17,24 @@
 /* Includes ------------------------------------------------------------------*/
 
 #include "stm32f4xx_hal.h"
+#include "usart.h"
+#include <cstring>
 
 /* Exported macros -----------------------------------------------------------*/
 
-// »º³åÇø×Ö½Ú³¤¶È
-#define UART_BUFFER_SIZE 256
+// ç¼“å†²åŒºå­—èŠ‚é•¿åº¦
+#define UART_BUFFER_SIZE 512
 
 /* Exported types ------------------------------------------------------------*/
 
 /**
- * @brief UARTÍ¨ĞÅ½ÓÊÕ»Øµ÷º¯ÊıÊı¾İÀàĞÍ
+ * @brief UARTé€šä¿¡æ¥æ”¶å›è°ƒå‡½æ•°æ•°æ®ç±»å‹
  *
  */
 typedef void (*UART_Call_Back)(uint8_t *Buffer, uint16_t Length);
 
 /**
- * @brief UARTÍ¨ĞÅ´¦Àí½á¹¹Ìå
+ * @brief UARTé€šä¿¡å¤„ç†ç»“æ„ä½“
  */
 struct Struct_UART_Manage_Object
 {
@@ -43,11 +47,7 @@ struct Struct_UART_Manage_Object
 
 /* Exported variables --------------------------------------------------------*/
 
-extern UART_HandleTypeDef huart1;
-extern UART_HandleTypeDef huart2;
-extern UART_HandleTypeDef huart3;
-extern UART_HandleTypeDef huart6;
-extern UART_HandleTypeDef huart7;
+extern bool init_finished;
 
 extern Struct_UART_Manage_Object UART1_Manage_Object;
 extern Struct_UART_Manage_Object UART2_Manage_Object;
@@ -60,9 +60,11 @@ extern Struct_UART_Manage_Object UART6_Manage_Object;
 
 void UART_Init(UART_HandleTypeDef *huart, UART_Call_Back Callback_Function, uint16_t Rx_Buffer_Length);
 
+void UART_Reinit(UART_HandleTypeDef *huart);
+
 uint8_t UART_Send_Data(UART_HandleTypeDef *huart, uint8_t *Data, uint16_t Length);
 
-void TIM_UART_PeriodElapsedCallback();
+void TIM_1ms_UART_PeriodElapsedCallback();
 
 #endif
 

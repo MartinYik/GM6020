@@ -94,67 +94,67 @@ uint8_t *allocate_tx_data(CAN_HandleTypeDef *hcan, Enum_CAN_Motor_ID __CAN_ID)
         break;
         }
     }
-     else if (hcan == &hcan2)
-     {
-         switch (__CAN_ID)
-         {
-         case (CAN_Motor_ID_0x201):
-         {
-             tmp_tx_data_ptr = &(CAN2_0x200_Tx_Data[0]);
-         }
-         break;
-         case (CAN_Motor_ID_0x202):
-         {
-             tmp_tx_data_ptr = &(CAN2_0x200_Tx_Data[2]);
-         }
-         break;
-         case (CAN_Motor_ID_0x203):
-         {
-             tmp_tx_data_ptr = &(CAN2_0x200_Tx_Data[4]);
-         }
-         break;
-         case (CAN_Motor_ID_0x204):
-         {
-             tmp_tx_data_ptr = &(CAN2_0x200_Tx_Data[6]);
-         }
-         break;
-         case (CAN_Motor_ID_0x205):
-         {
-             tmp_tx_data_ptr = &(CAN2_0x1ff_Tx_Data[0]);
-         }
-         break;
-         case (CAN_Motor_ID_0x206):
-         {
-             tmp_tx_data_ptr = &(CAN2_0x1ff_Tx_Data[2]);
-         }
-         break;
-         case (CAN_Motor_ID_0x207):
-         {
-             tmp_tx_data_ptr = &(CAN2_0x1ff_Tx_Data[4]);
-         }
-         break;
-         case (CAN_Motor_ID_0x208):
-         {
-             tmp_tx_data_ptr = &(CAN2_0x1ff_Tx_Data[6]);
-         }
-         break;
-         case (CAN_Motor_ID_0x209):
-         {
-             tmp_tx_data_ptr = &(CAN2_0x2ff_Tx_Data[0]);
-         }
-         break;
-         case (CAN_Motor_ID_0x20A):
-         {
-             tmp_tx_data_ptr = &(CAN2_0x2ff_Tx_Data[2]);
-         }
-         break;
-         case (CAN_Motor_ID_0x20B):
-         {
-             tmp_tx_data_ptr = &(CAN2_0x2ff_Tx_Data[4]);
-         }
-         break;
-         }
-     }
+    else if (hcan == &hcan2)
+    {
+        switch (__CAN_ID)
+        {
+        case (CAN_Motor_ID_0x201):
+        {
+            tmp_tx_data_ptr = &(CAN2_0x200_Tx_Data[0]);
+        }
+        break;
+        case (CAN_Motor_ID_0x202):
+        {
+            tmp_tx_data_ptr = &(CAN2_0x200_Tx_Data[2]);
+        }
+        break;
+        case (CAN_Motor_ID_0x203):
+        {
+            tmp_tx_data_ptr = &(CAN2_0x200_Tx_Data[4]);
+        }
+        break;
+        case (CAN_Motor_ID_0x204):
+        {
+            tmp_tx_data_ptr = &(CAN2_0x200_Tx_Data[6]);
+        }
+        break;
+        case (CAN_Motor_ID_0x205):
+        {
+            tmp_tx_data_ptr = &(CAN2_0x1ff_Tx_Data[0]);
+        }
+        break;
+        case (CAN_Motor_ID_0x206):
+        {
+            tmp_tx_data_ptr = &(CAN2_0x1ff_Tx_Data[2]);
+        }
+        break;
+        case (CAN_Motor_ID_0x207):
+        {
+            tmp_tx_data_ptr = &(CAN2_0x1ff_Tx_Data[4]);
+        }
+        break;
+        case (CAN_Motor_ID_0x208):
+        {
+            tmp_tx_data_ptr = &(CAN2_0x1ff_Tx_Data[6]);
+        }
+        break;
+        case (CAN_Motor_ID_0x209):
+        {
+            tmp_tx_data_ptr = &(CAN2_0x2ff_Tx_Data[0]);
+        }
+        break;
+        case (CAN_Motor_ID_0x20A):
+        {
+            tmp_tx_data_ptr = &(CAN2_0x2ff_Tx_Data[2]);
+        }
+        break;
+        case (CAN_Motor_ID_0x20B):
+        {
+            tmp_tx_data_ptr = &(CAN2_0x2ff_Tx_Data[4]);
+        }
+        break;
+        }
+    }
     return (tmp_tx_data_ptr);
 }
 
@@ -165,9 +165,9 @@ uint8_t *allocate_tx_data(CAN_HandleTypeDef *hcan, Enum_CAN_Motor_ID __CAN_ID)
  * @param __CAN_ID 绑定的CAN ID
  * @param __Control_Method 电机控制方式, 默认角度
  * @param __Encoder_Offset 编码器偏移, 默认0
- * @param __Omega_Max 最大速度, 需根据不同负载测量后赋值, 也就开环输出用得到, 不过我感觉应该没有奇葩喜欢开环输出这玩意
+ * @param __Rpm_Max 最大速度, 需根据不同负载测量后赋值, 也就开环输出用得到, 不过我感觉应该没有奇葩喜欢开环输出这玩意
  */
-void Class_Motor_GM6020::Init(CAN_HandleTypeDef *hcan, Enum_CAN_Motor_ID __CAN_ID, Enum_Control_Method __Control_Method, int32_t __Encoder_Offset, float __Omega_Max)
+void Class_Motor_GM6020::Init(CAN_HandleTypeDef *hcan, Enum_CAN_Motor_ID __CAN_ID, Enum_Control_Method __Control_Method, int32_t __Encoder_Offset, float __Rpm_Max)
 {
     if (hcan->Instance == CAN1)
     {
@@ -180,7 +180,7 @@ void Class_Motor_GM6020::Init(CAN_HandleTypeDef *hcan, Enum_CAN_Motor_ID __CAN_I
     CAN_ID = __CAN_ID;
     Control_Method = __Control_Method;
     Encoder_Offset = __Encoder_Offset;
-    Omega_Max = __Omega_Max;
+    Rpm_Max = __Rpm_Max;
     CAN_Tx_Data = allocate_tx_data(hcan, __CAN_ID);
 }
 
@@ -215,9 +215,9 @@ Enum_CAN_Motor_Status Class_Motor_GM6020::Get_CAN_Motor_Status()
 }
 
 /**
- * @brief 获取当前的角度, rad
+ * @brief 获取当前的角度, °
  *
- * @return float 当前的角度, rad
+ * @return float 当前的角度, °
  */
 float Class_Motor_GM6020::Get_Now_Angle()
 {
@@ -225,13 +225,13 @@ float Class_Motor_GM6020::Get_Now_Angle()
 }
 
 /**
- * @brief 获取当前的速度, rad/s
+ * @brief 获取当前的速度, rpm
  *
- * @return float 当前的速度, rad/s
+ * @return float 当前的速度, rpm
  */
-float Class_Motor_GM6020::Get_Now_Omega()
+float Class_Motor_GM6020::Get_Now_Rpm()
 {
-    return (Now_Omega);
+    return (Now_Rpm);
 }
 
 /**
@@ -265,9 +265,9 @@ Enum_Control_Method Class_Motor_GM6020::Get_Control_Method()
 }
 
 /**
- * @brief 获取目标的角度, rad
+ * @brief 获取目标的角度, °
  *
- * @return float 目标的角度, rad
+ * @return float 目标的角度, °
  */
 float Class_Motor_GM6020::Get_Target_Angle()
 {
@@ -275,13 +275,13 @@ float Class_Motor_GM6020::Get_Target_Angle()
 }
 
 /**
- * @brief 获取目标的速度, rad/s
+ * @brief 获取目标的速度, rpm
  *
- * @return float 目标的速度, rad/s
+ * @return float 目标的速度, rpm
  */
-float Class_Motor_GM6020::Get_Target_Omega()
+float Class_Motor_GM6020::Get_Target_Rpm()
 {
-    return (Target_Omega);
+    return (Target_Rpm);
 }
 
 /**
@@ -315,9 +315,9 @@ void Class_Motor_GM6020::Set_Control_Method(Enum_Control_Method __Control_Method
 }
 
 /**
- * @brief 设定目标的角度, rad
+ * @brief 设定目标的角度, °
  *
- * @param __Target_Angle 目标的角度, rad
+ * @param __Target_Angle 目标的角度, °
  */
 void Class_Motor_GM6020::Set_Target_Angle(float __Target_Angle)
 {
@@ -325,13 +325,13 @@ void Class_Motor_GM6020::Set_Target_Angle(float __Target_Angle)
 }
 
 /**
- * @brief 设定目标的速度, rad/s
+ * @brief 设定目标的速度, rpm
  *
- * @param __Target_Omega 目标的速度, rad/s
+ * @param __Target_Rpm 目标的速度, rpm
  */
-void Class_Motor_GM6020::Set_Target_Omega(float __Target_Omega)
+void Class_Motor_GM6020::Set_Target_Rpm(float __Target_Rpm)
 {
-    Target_Omega = __Target_Omega;
+    Target_Rpm = __Target_Rpm;
 }
 
 /**
@@ -368,25 +368,25 @@ void Class_Motor_GM6020::CAN_RxCpltCallback(uint8_t *Rx_Data)
     Pre_Encoder = Rx_Encoder;
 
     Rx_Encoder = (Rx_Data[0] << 8) | Rx_Data[1];
-    Rx_Omega = (Rx_Data[2] << 8) | Rx_Data[3];
+    Rx_Rpm = (Rx_Data[2] << 8) | Rx_Data[3];
     Rx_Torque = (Rx_Data[4] << 8) | Rx_Data[5];
     Rx_Temperature = Rx_Data[6];
 
     delta_encoder = Rx_Encoder - Pre_Encoder;
     if (delta_encoder < -4096)
     {
-        //正方向转过了一圈
+        // 正方向转过了一圈
         Total_Round++;
     }
     else if (delta_encoder > 4096)
     {
-        //反方向转过了一圈
+        // 反方向转过了一圈
         Total_Round--;
     }
     Total_Encoder = Total_Round * Encoder_Num_Per_Round + Rx_Encoder + Encoder_Offset;
 
     Now_Angle = (float)Total_Encoder / (float)Encoder_Num_Per_Round * 2.0f * PI;
-    Now_Omega = (float)Rx_Omega * RPM_TO_RADPS;
+    Now_Rpm = (float)Rx_Rpm;
     Now_Torque = Rx_Torque;
     Now_Temperature = Rx_Temperature;
 }
@@ -397,18 +397,18 @@ void Class_Motor_GM6020::CAN_RxCpltCallback(uint8_t *Rx_Data)
  */
 void Class_Motor_GM6020::TIM_Alive_PeriodElapsedCallback()
 {
-    //判断该时间段内是否接收过电机数据
+    // 判断该时间段内是否接收过电机数据
     if (Flag == Pre_Flag)
     {
-        //电机断开连接
+        // 电机断开连接
         CAN_Motor_Status = CAN_Motor_Status_DISABLE;
         PID_Angle.Set_Integral_Error(0.0f);
-        PID_Omega.Set_Integral_Error(0.0f);
+        PID_Rpm.Set_Integral_Error(0.0f);
         PID_Torque.Set_Integral_Error(0.0f);
     }
     else
     {
-        //电机保持连接
+        // 电机保持连接
         CAN_Motor_Status = CAN_Motor_Status_ENABLE;
     }
     Pre_Flag = Flag;
@@ -424,8 +424,8 @@ void Class_Motor_GM6020::TIM_PID_PeriodElapsedCallback()
     {
     case (Control_Method_OPENLOOP):
     {
-        //默认开环速度控制
-        Set_Out(Target_Omega / Omega_Max * Output_Max);
+        // 默认开环速度控制
+        Set_Out(Target_Rpm / Rpm_Max * Output_Max);
     }
     break;
     case (Control_Method_TORQUE):
@@ -437,13 +437,13 @@ void Class_Motor_GM6020::TIM_PID_PeriodElapsedCallback()
         Set_Out(PID_Torque.Get_Out());
     }
     break;
-    case (Control_Method_OMEGA):
+    case (Control_Method_RPM):
     {
-        PID_Omega.Set_Target(Target_Omega);
-        PID_Omega.Set_Now(Now_Omega);
-        PID_Omega.TIM_Adjust_PeriodElapsedCallback();
+        PID_Rpm.Set_Target(Target_Rpm);
+        PID_Rpm.Set_Now(Now_Rpm);
+        PID_Rpm.TIM_Adjust_PeriodElapsedCallback();
 
-        Target_Torque = PID_Omega.Get_Out();
+        Target_Torque = PID_Rpm.Get_Out();
 
         PID_Torque.Set_Target(Target_Torque);
         PID_Torque.Set_Now(Now_Torque);
@@ -458,13 +458,13 @@ void Class_Motor_GM6020::TIM_PID_PeriodElapsedCallback()
         PID_Angle.Set_Now(Now_Angle);
         PID_Angle.TIM_Adjust_PeriodElapsedCallback();
 
-        Target_Omega = PID_Angle.Get_Out();
+        Target_Rpm = PID_Angle.Get_Out();
 
-        PID_Omega.Set_Target(Target_Omega);
-        PID_Omega.Set_Now(Now_Omega);
-        PID_Omega.TIM_Adjust_PeriodElapsedCallback();
+        PID_Rpm.Set_Target(Target_Rpm);
+        PID_Rpm.Set_Now(Now_Rpm);
+        PID_Rpm.TIM_Adjust_PeriodElapsedCallback();
 
-        Target_Torque = PID_Omega.Get_Out();
+        Target_Torque = PID_Rpm.Get_Out();
 
         PID_Torque.Set_Target(Target_Torque);
         PID_Torque.Set_Now(Now_Torque);
@@ -539,9 +539,9 @@ Enum_CAN_Motor_Status Class_Motor_C610::Get_CAN_Motor_Status()
 }
 
 /**
- * @brief 获取当前的角度, rad
+ * @brief 获取当前的角度, °
  *
- * @return float 当前的角度, rad
+ * @return float 当前的角度, °
  */
 float Class_Motor_C610::Get_Now_Angle()
 {
@@ -549,13 +549,13 @@ float Class_Motor_C610::Get_Now_Angle()
 }
 
 /**
- * @brief 获取当前的速度, rad/s
+ * @brief 获取当前的速度, rpm
  *
- * @return float 当前的速度, rad/s
+ * @return float 当前的速度, rpm
  */
-float Class_Motor_C610::Get_Now_Omega()
+float Class_Motor_C610::Get_Now_Rpm()
 {
-    return (Now_Omega);
+    return (Now_Rpm);
 }
 
 /**
@@ -589,9 +589,9 @@ Enum_Control_Method Class_Motor_C610::Get_Control_Method()
 }
 
 /**
- * @brief 获取目标的角度, rad
+ * @brief 获取目标的角度, °
  *
- * @return float 目标的角度, rad
+ * @return float 目标的角度, °
  */
 float Class_Motor_C610::Get_Target_Angle()
 {
@@ -599,13 +599,13 @@ float Class_Motor_C610::Get_Target_Angle()
 }
 
 /**
- * @brief 获取目标的速度, rad/s
+ * @brief 获取目标的速度, rpm
  *
- * @return float 目标的速度, rad/s
+ * @return float 目标的速度, rpm
  */
-float Class_Motor_C610::Get_Target_Omega()
+float Class_Motor_C610::Get_Target_Rpm()
 {
-    return (Target_Omega);
+    return (Target_Rpm);
 }
 
 /**
@@ -639,9 +639,9 @@ void Class_Motor_C610::Set_Control_Method(Enum_Control_Method __Control_Method)
 }
 
 /**
- * @brief 设定目标的角度, rad
+ * @brief 设定目标的角度, °
  *
- * @param __Target_Angle 目标的角度, rad
+ * @param __Target_Angle 目标的角度, °
  */
 void Class_Motor_C610::Set_Target_Angle(float __Target_Angle)
 {
@@ -649,13 +649,13 @@ void Class_Motor_C610::Set_Target_Angle(float __Target_Angle)
 }
 
 /**
- * @brief 设定目标的速度, rad/s
+ * @brief 设定目标的速度, rpm
  *
- * @param __Target_Omega 目标的速度, rad/s
+ * @param __Target_Rpm 目标的速度, rpm
  */
-void Class_Motor_C610::Set_Target_Omega(float __Target_Omega)
+void Class_Motor_C610::Set_Target_Rpm(float __Target_Rpm)
 {
-    Target_Omega = __Target_Omega;
+    Target_Rpm = __Target_Rpm;
 }
 
 /**
@@ -692,25 +692,25 @@ void Class_Motor_C610::CAN_RxCpltCallback(uint8_t *Rx_Data)
     Pre_Encoder = Rx_Encoder;
 
     Rx_Encoder = (Rx_Data[0] << 8) | Rx_Data[1];
-    Rx_Omega = (Rx_Data[2] << 8) | Rx_Data[3];
+    Rx_Rpm = (Rx_Data[2] << 8) | Rx_Data[3];
     Rx_Torque = (Rx_Data[4] << 8) | Rx_Data[5];
     Rx_Temperature = Rx_Data[6];
 
     delta_encoder = Rx_Encoder - Pre_Encoder;
     if (delta_encoder < -4096)
     {
-        //正方向转过了一圈
+        // 正方向转过了一圈
         Total_Round++;
     }
     else if (delta_encoder > 4096)
     {
-        //反方向转过了一圈
+        // 反方向转过了一圈
         Total_Round--;
     }
     Total_Encoder = Total_Round * Encoder_Num_Per_Round + Rx_Encoder;
 
-    Now_Angle = (float)Total_Encoder / (float)Encoder_Num_Per_Round * 2.0f * PI / Gearbox_Rate;
-    Now_Omega = (float)Rx_Omega * RPM_TO_RADPS / Gearbox_Rate;
+    Now_Angle = (float)Total_Encoder / (float)Encoder_Num_Per_Round * 360.0f / Gearbox_Rate;
+    Now_Rpm = (float)Rx_Rpm / Gearbox_Rate;
     Now_Torque = Rx_Torque;
     Now_Temperature = Rx_Temperature;
 }
@@ -721,17 +721,17 @@ void Class_Motor_C610::CAN_RxCpltCallback(uint8_t *Rx_Data)
  */
 void Class_Motor_C610::TIM_Alive_PeriodElapsedCallback()
 {
-    //判断该时间段内是否接收过电机数据
+    // 判断该时间段内是否接收过电机数据
     if (Flag == Pre_Flag)
     {
-        //电机断开连接
+        // 电机断开连接
         CAN_Motor_Status = CAN_Motor_Status_DISABLE;
         PID_Angle.Set_Integral_Error(0.0f);
-        PID_Omega.Set_Integral_Error(0.0f);
+        PID_Rpm.Set_Integral_Error(0.0f);
     }
     else
     {
-        //电机保持连接
+        // 电机保持连接
         CAN_Motor_Status = CAN_Motor_Status_ENABLE;
     }
     Pre_Flag = Flag;
@@ -747,23 +747,23 @@ void Class_Motor_C610::TIM_PID_PeriodElapsedCallback()
     {
     case (Control_Method_OPENLOOP):
     {
-        //默认开环扭矩控制
+        // 默认开环扭矩控制
         Set_Out(Target_Torque / Torque_Max * Output_Max);
     }
     break;
     case (Control_Method_TORQUE):
     {
-        //默认闭环扭矩控制
+        // 默认闭环扭矩控制
         Set_Out(Target_Torque / Torque_Max * Output_Max);
     }
     break;
-    case (Control_Method_OMEGA):
+    case (Control_Method_RPM):
     {
-        PID_Omega.Set_Target(Target_Omega);
-        PID_Omega.Set_Now(Now_Omega);
-        PID_Omega.TIM_Adjust_PeriodElapsedCallback();
+        PID_Rpm.Set_Target(Target_Rpm);
+        PID_Rpm.Set_Now(Now_Rpm);
+        PID_Rpm.TIM_Adjust_PeriodElapsedCallback();
 
-        Set_Out(PID_Omega.Get_Out());
+        Set_Out(PID_Rpm.Get_Out());
     }
     break;
     case (Control_Method_ANGLE):
@@ -772,13 +772,13 @@ void Class_Motor_C610::TIM_PID_PeriodElapsedCallback()
         PID_Angle.Set_Now(Now_Angle);
         PID_Angle.TIM_Adjust_PeriodElapsedCallback();
 
-        Target_Omega = PID_Angle.Get_Out();
+        Target_Rpm = PID_Angle.Get_Out();
 
-        PID_Omega.Set_Target(Target_Omega);
-        PID_Omega.Set_Now(Now_Omega);
-        PID_Omega.TIM_Adjust_PeriodElapsedCallback();
+        PID_Rpm.Set_Target(Target_Rpm);
+        PID_Rpm.Set_Now(Now_Rpm);
+        PID_Rpm.TIM_Adjust_PeriodElapsedCallback();
 
-        Set_Out(PID_Omega.Get_Out());
+        Set_Out(PID_Rpm.Get_Out());
     }
     break;
     default:
@@ -847,9 +847,9 @@ Enum_CAN_Motor_Status Class_Motor_C620::Get_CAN_Motor_Status()
 }
 
 /**
- * @brief 获取当前的角度, rad
+ * @brief 获取当前的角度, °
  *
- * @return float 当前的角度, rad
+ * @return float 当前的角度, °
  */
 float Class_Motor_C620::Get_Now_Angle()
 {
@@ -857,13 +857,13 @@ float Class_Motor_C620::Get_Now_Angle()
 }
 
 /**
- * @brief 获取当前的速度, rad/s
+ * @brief 获取当前的速度, rpm
  *
- * @return float 当前的速度, rad/s
+ * @return float 当前的速度, rpm
  */
-float Class_Motor_C620::Get_Now_Omega()
+float Class_Motor_C620::Get_Now_Rpm()
 {
-    return (Now_Omega);
+    return (Now_Rpm);
 }
 
 /**
@@ -897,9 +897,9 @@ Enum_Control_Method Class_Motor_C620::Get_Control_Method()
 }
 
 /**
- * @brief 获取目标的角度, rad
+ * @brief 获取目标的角度, °
  *
- * @return float 目标的角度, rad
+ * @return float 目标的角度, °
  */
 float Class_Motor_C620::Get_Target_Angle()
 {
@@ -907,13 +907,13 @@ float Class_Motor_C620::Get_Target_Angle()
 }
 
 /**
- * @brief 获取目标的速度, rad/s
+ * @brief 获取目标的速度, rpm
  *
- * @return float 目标的速度, rad/s
+ * @return float 目标的速度, rpm
  */
-float Class_Motor_C620::Get_Target_Omega()
+float Class_Motor_C620::Get_Target_Rpm()
 {
-    return (Target_Omega);
+    return (Target_Rpm);
 }
 
 /**
@@ -947,9 +947,9 @@ void Class_Motor_C620::Set_Control_Method(Enum_Control_Method __Control_Method)
 }
 
 /**
- * @brief 设定目标的角度, rad
+ * @brief 设定目标的角度, °
  *
- * @param __Target_Angle 目标的角度, rad
+ * @param __Target_Angle 目标的角度, °
  */
 void Class_Motor_C620::Set_Target_Angle(float __Target_Angle)
 {
@@ -957,13 +957,13 @@ void Class_Motor_C620::Set_Target_Angle(float __Target_Angle)
 }
 
 /**
- * @brief 设定目标的速度, rad/s
+ * @brief 设定目标的速度, rpm
  *
- * @param __Target_Omega 目标的速度, rad/s
+ * @param __Target_Rpm 目标的速度, rpm
  */
-void Class_Motor_C620::Set_Target_Omega(float __Target_Omega)
+void Class_Motor_C620::Set_Target_Rpm(float __Target_Rpm)
 {
-    Target_Omega = __Target_Omega;
+    Target_Rpm = __Target_Rpm;
 }
 
 /**
@@ -1000,25 +1000,25 @@ void Class_Motor_C620::CAN_RxCpltCallback(uint8_t *Rx_Data)
     Pre_Encoder = Rx_Encoder;
 
     Rx_Encoder = (Rx_Data[0] << 8) | Rx_Data[1];
-    Rx_Omega = (Rx_Data[2] << 8) | Rx_Data[3];
+    Rx_Rpm = (Rx_Data[2] << 8) | Rx_Data[3];
     Rx_Torque = (Rx_Data[4] << 8) | Rx_Data[5];
     Rx_Temperature = Rx_Data[6];
 
     delta_encoder = Rx_Encoder - Pre_Encoder;
     if (delta_encoder < -4096)
     {
-        //正方向转过了一圈
+        // 正方向转过了一圈
         Total_Round++;
     }
     else if (delta_encoder > 4096)
     {
-        //反方向转过了一圈
+        // 反方向转过了一圈
         Total_Round--;
     }
     Total_Encoder = Total_Round * Encoder_Num_Per_Round + Rx_Encoder;
 
-    Now_Angle = (float)Total_Encoder / (float)Encoder_Num_Per_Round * 2.0f * PI / Gearbox_Rate;
-    Now_Omega = (float)Rx_Omega * RPM_TO_RADPS / Gearbox_Rate;
+    Now_Angle = (float)Total_Encoder / (float)Encoder_Num_Per_Round * 360.0f / Gearbox_Rate;
+    Now_Rpm = (float)Rx_Rpm / Gearbox_Rate;
     Now_Torque = Rx_Torque;
     Now_Temperature = Rx_Temperature;
 }
@@ -1029,17 +1029,17 @@ void Class_Motor_C620::CAN_RxCpltCallback(uint8_t *Rx_Data)
  */
 void Class_Motor_C620::TIM_Alive_PeriodElapsedCallback()
 {
-    //判断该时间段内是否接收过电机数据
+    // 判断该时间段内是否接收过电机数据
     if (Flag == Pre_Flag)
     {
-        //电机断开连接
+        // 电机断开连接
         CAN_Motor_Status = CAN_Motor_Status_DISABLE;
         PID_Angle.Set_Integral_Error(0.0f);
-        PID_Omega.Set_Integral_Error(0.0f);
+        PID_Rpm.Set_Integral_Error(0.0f);
     }
     else
     {
-        //电机保持连接
+        // 电机保持连接
         CAN_Motor_Status = CAN_Motor_Status_ENABLE;
     }
     Pre_Flag = Flag;
@@ -1055,23 +1055,23 @@ void Class_Motor_C620::TIM_PID_PeriodElapsedCallback()
     {
     case (Control_Method_OPENLOOP):
     {
-        //默认开环扭矩控制
+        // 默认开环扭矩控制
         Set_Out(Target_Torque / Torque_Max * Output_Max);
     }
     break;
     case (Control_Method_TORQUE):
     {
-        //默认闭环扭矩控制
+        // 默认闭环扭矩控制
         Set_Out(Target_Torque / Torque_Max * Output_Max);
     }
     break;
-    case (Control_Method_OMEGA):
+    case (Control_Method_RPM):
     {
-        PID_Omega.Set_Target(Target_Omega);
-        PID_Omega.Set_Now(Now_Omega);
-        PID_Omega.TIM_Adjust_PeriodElapsedCallback();
+        PID_Rpm.Set_Target(Target_Rpm);
+        PID_Rpm.Set_Now(Now_Rpm);
+        PID_Rpm.TIM_Adjust_PeriodElapsedCallback();
 
-        Set_Out(PID_Omega.Get_Out());
+        Set_Out(PID_Rpm.Get_Out());
     }
     break;
     case (Control_Method_ANGLE):
@@ -1080,13 +1080,13 @@ void Class_Motor_C620::TIM_PID_PeriodElapsedCallback()
         PID_Angle.Set_Now(Now_Angle);
         PID_Angle.TIM_Adjust_PeriodElapsedCallback();
 
-        Target_Omega = PID_Angle.Get_Out();
+        Target_Rpm = PID_Angle.Get_Out();
 
-        PID_Omega.Set_Target(Target_Omega);
-        PID_Omega.Set_Now(Now_Omega);
-        PID_Omega.TIM_Adjust_PeriodElapsedCallback();
+        PID_Rpm.Set_Target(Target_Rpm);
+        PID_Rpm.Set_Now(Now_Rpm);
+        PID_Rpm.TIM_Adjust_PeriodElapsedCallback();
 
-        Set_Out(PID_Omega.Get_Out());
+        Set_Out(PID_Rpm.Get_Out());
     }
     break;
     default:

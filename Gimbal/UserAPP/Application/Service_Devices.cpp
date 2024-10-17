@@ -11,24 +11,28 @@
   ===============================================================================
   * <table>
   * <tr><th>Task Name     <th>Priority          <th>Frequency/Hz    <th>Stack/Byte
-  * <tr><td>              <td>                  <td>                <td>    
+  * <tr><td>              <td>                  <td>                <td>
   * </table>
   *
  */
 /* Includes ------------------------------------------------------------------*/
 #include "Service_Devices.h"
 /* Private define ------------------------------------------------------------*/
-TaskHandle_t DeviceDR16_Handle;
+TaskHandle_t DR16_Handle;
+TaskHandle_t MotorSet_Handle;
 TaskHandle_t LedSet_Handle;
 /* Private variables ---------------------------------------------------------*/
+float Yaw_Target_Rpm = 0;
+float Yaw_Now_Rpm = 0;
+float Yaw_Target_Angle = 0;
+float Yaw_Now_Angle = 0;
 /* Private function declarations ---------------------------------------------*/
-void Device_DR16(void *arg);
-void Device_Control(void *arg);
-void Mode_Set(void *arg);
+void DR16_Test(void *arg);
+void Motor_Set(void *arg);
 void Led_Set(void *arg);
 /* Exported devices ----------------------------------------------------------*/
 /* Motor & ESC & Other actuators*/
-//Motor_AK80_9  Test_Motor(1, 0, 0);
+// Motor_AK80_9  Test_Motor(1, 0, 0);
 /* Remote control */
 
 /* IMU & NUC & Other sensors */
@@ -37,52 +41,55 @@ void Led_Set(void *arg);
 
 /* Function prototypes -------------------------------------------------------*/
 /**
-* @brief  Initialization of device management service
-* @param  None.
-* @return None.
-*/
+ * @brief  Initialization of device management service
+ * @param  None.
+ * @return None.
+ */
 void Service_Devices_Init(void)
 {
-//	xTaskCreate(Device_DR16,      	"Dev.DR16", 		Small_Stack_Size,  	NULL, 	PriorityHigh,   		&DeviceDR16_Handle);
-	xTaskCreate(Led_Set,			"Led_set",			Small_Stack_Size,	NULL,	PriorityHigh,			&LedSet_Handle);
+  xTaskCreate(DR16_Test, "DR16_Test", Normal_Stack_Size, NULL, PriorityNormal, &DR16_Handle);
+  xTaskCreate(Motor_Set, "Motor_set", Normal_Stack_Size, NULL, PriorityNormal, &MotorSet_Handle);
+  xTaskCreate(Led_Set, "Led_set", Small_Stack_Size, NULL, PriorityLow, &LedSet_Handle);
 }
-
 
 void Led_Set(void *arg)
 {
-	for(;;)
-	{
-		led13.LedToggle();
-		osDelay(500);
-	}
-	
+  for (;;)
+  {
+    led13.LedToggle();
+    osDelay(500);
+  }
 }
 
+void Motor_Set(void *arg)
+{
+  /* Cache for Task */
 
+  /* Pre-Load for task */
 
+  /* Infinite loop */
 
+  for (;;)
+  {
+    // Yaw_Motor.Set_Target_Angle(0);
+    // Yaw_Target_Angle = Yaw_Motor.Get_Target_Angle();
+    // Yaw_Now_Angle = Yaw_Motor.Get_Now_Angle();
+    DR16.TIM_1ms_Calculate_PeriodElapsedCallback();
 
+    TIM_CAN_PeriodElapsedCallback();
 
-//void Device_DR16(void *arg)
-//{
-//  /* Cache for Task */
+    osDelay(1);
+  }
+}
 
-//  /* Pre-Load for task */
-
-//  /* Infinite loop */
-//	DR16_DataPack_Typedef* dr16_pack;
-//	TickType_t _xTicksToWait = pdMS_TO_TICKS(1);
-//	for(;;)
-//	{
-//		
-//		if(xTaskNotifyWait(0x00000000, 0xFFFFFFFF, (uint32_t *) &dr16_pack, 0) == pdTRUE)
-//			{
-//				/* Remote control data unpacking */
-//				DR16.DataCapture(dr16_pack);
-//			}
-//	}
-//}
-
+void DR16_Test(void *arg)
+{
+  for (;;)
+  {
+    DR16.TIM_100ms_Alive_PeriodElapsedCallback();
+    osDelay(100);
+  }
+}
 /* User Code End Here ---------------------------------*/
 
 /************************ COPYRIGHT(C) SCUT-ROBOTLAB **************************/
