@@ -46,7 +46,7 @@ struct Struct_UART_Manage_Object
 };
 
 /* Exported variables --------------------------------------------------------*/
-
+extern uint8_t tail[4];
 extern bool init_finished;
 
 extern Struct_UART_Manage_Object UART1_Manage_Object;
