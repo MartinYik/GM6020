@@ -61,12 +61,12 @@ void System_Source_Init()
 
   DR16.Init(&huart2);
 
-  Left_Fric.PID_Rpm.Init(0.0f, 0.0f, 0.0f, 0.0f, 25000.0f, 25000.0f);
-  Right_Fric.PID_Rpm.Init(0.0f, 0.0f, 0.0f, 0.0f, 25000.0f, 25000.0f);
+  Left_Fric.PID_Rpm.Init(0.0f, 0.0f, 0.0f, 0.0f, 16384.0f, 16384.0f);
+  Right_Fric.PID_Rpm.Init(0.0f, 0.0f, 0.0f, 0.0f, 16384.0f, 16384.0f);
   Left_Fric.Init(&hcan1, CAN_Motor_ID_0x203, Control_Method_RPM);
   Right_Fric.Init(&hcan1, CAN_Motor_ID_0x202, Control_Method_RPM);
 
-  Dial_Motor.PID_Rpm.Init(0.0f, 0.0f, 0.0f, 0.0f, 25000.0f, 25000.0f);
+  Dial_Motor.PID_Rpm.Init(0.0f, 0.0f, 0.0f, 0.0f, 10000.0f, 10000.0f);
   Dial_Motor.PID_Angle.Init(0.0f, 0.0f, 0.0f, 0.0f, 720.f, 720.f);
   Dial_Motor.Init(&hcan1, CAN_Motor_ID_0x201, Control_Method_RPM);
 

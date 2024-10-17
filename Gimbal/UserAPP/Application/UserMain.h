@@ -1,13 +1,5 @@
-/**
- ******************************************************************************
- * @file   : System_config.h
- * @brief  : Header for System_config.c
- * @author : Mentos Seetoo
- ******************************************************************************
- **/
-
-#ifndef SYS_CONFIG_H
-#define SYS_CONFIG_H
+#ifndef USER_MAIN_H
+#define USER_MAIN_H
 
 #ifdef __cplusplus
 /* Includes ------------------------------------------------------------------*/
@@ -26,4 +18,3 @@ void DR16_UART2_Callback(uint8_t *Buffer, uint16_t Length);
 #endif
 
 #endif
-/************************ COPYRIGHT(C) SCUT-ROBOTLAB **************************/

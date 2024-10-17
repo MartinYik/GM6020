@@ -1,9 +1,10 @@
 /**
  * @file dvc_motor.cpp
  * @author yssickjgd (yssickjgd@mail.ustc.edu.cn)
- * @brief CAN电机配置与操作
- * @version 0.1
+ * @brief 修改自USTC的CAN电机配置与操作
+ * @version 0.2
  * @date 2022-08-03
+ * @date 2024-10-17 0.2 修改了一些相关配置
  *
  * @copyright USTC-RoboWalker (c) 2022
  *

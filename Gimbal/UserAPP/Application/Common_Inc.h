@@ -1,14 +1,5 @@
-/**
- ******************************************************************************
- * @file   System_DataPool.h
- * @brief  All used resources are contained in this file.
- ******************************************************************************
- * @note
- *  - User can define datas including variables ,structs ,and arrays in
- *    this file, which are used in deffrient tasks or services.
- **/
-#ifndef _DATA_POOL_H_
-#define _DATA_POOL_H_
+#ifndef _COM_INC_H_
+#define _COM_INC_H_
 
 /* Includes ------------------------------------------------------------------*/
 /* Middlewares & Drivers Support */
@@ -61,12 +52,6 @@ extern QueueHandle_t CAN1_TxPort;
 extern QueueHandle_t CAN2_TxPort;
 extern QueueHandle_t CAN1_RxPort;
 extern QueueHandle_t CAN2_RxPort;
-// extern QueueHandle_t  DR16_QueueHandle;
-// extern QueueHandle_t  RMMotor_QueueHandle;
-// extern QueueHandle_t  SuperRelay_QueueHandle;
-// extern QueueHandle_t  IMU_QueueHandle;
-// extern QueueHandle_t  NUC_QueueHandle;
-// extern QueueHandle_t  Referee_QueueHandle;
 
 /* Semaphores */
 /* Mutexes */
@@ -94,4 +79,3 @@ extern Class_Motor_C620 Left_Fric;
 extern Class_Motor_C620 Right_Fric;
 extern Class_Motor_C610 Dial_Motor;
 #endif
-/************************ COPYRIGHT(C) SCUT-ROBOTLAB **************************/

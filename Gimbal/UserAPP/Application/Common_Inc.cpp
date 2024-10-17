@@ -1,12 +1,3 @@
-/**
- ******************************************************************************
- * @file   System_DataPool.cpp
- * @brief  All used resources are contained in this file.
- ******************************************************************************
- * @note
- *  - User can define datas including variables ,structs ,and arrays in
- *    this file, which are used in deffrient tasks or services.
- **/
 #include "Common_Inc.h"
 
 /* Macro Definitions ---------------------------------------------------------*/
@@ -32,11 +23,6 @@ QueueHandle_t CAN1_TxPort;
 QueueHandle_t CAN2_TxPort;
 QueueHandle_t CAN1_RxPort;
 QueueHandle_t CAN2_RxPort;
-// QueueHandle_t  DR16_QueueHandle;
-// QueueHandle_t  RMMotor_QueueHandle;
-// QueueHandle_t  IMU_QueueHandle;
-// QueueHandle_t  NUC_QueueHandle;
-// QueueHandle_t  Referee_QueueHandle;
 
 /* Semaphores */
 /* Mutexes */
@@ -57,4 +43,3 @@ Class_Motor_GM6020 Yaw_Motor;
 Class_Motor_C620 Left_Fric;
 Class_Motor_C620 Right_Fric;
 Class_Motor_C610 Dial_Motor;
-/************************ COPYRIGHT(C) SCUT-ROBOTLAB **************************/

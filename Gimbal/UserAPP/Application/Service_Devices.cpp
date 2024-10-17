@@ -75,7 +75,7 @@ void Motor_Set(void *arg)
 
 		DR16.TIM_1ms_Calculate_PeriodElapsedCallback();
 
-		Left_Fric.Set_Target_Rpm(500.f);
+		Left_Fric.Set_Target_Rpm(6000.f);
 		Left_Fric_Target_Rpm = Left_Fric.Get_Target_Rpm();
 		Left_Fric_Now_Rpm = Left_Fric.Get_Now_Rpm();
 
