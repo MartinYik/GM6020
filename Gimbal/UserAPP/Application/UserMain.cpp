@@ -51,6 +51,7 @@ void System_Tasks_Init(void)
 
 void System_Source_Init()
 {
+	auto a = 1;
   CAN_Init(&hcan1, CAN1_Motor_Call_Back);
   CAN_Init(&hcan2, CAN2_Motor_Call_Back);
   UART_Init(&huart2, DR16_UART2_Callback, 36);
@@ -61,24 +62,23 @@ void System_Source_Init()
 
   DR16.Init(&huart2);
 
-  Left_Fric.PID_Rpm.Init(0.0f, 0.0f, 0.0f, 0.0f, 16384.0f, 16384.0f);
-  Right_Fric.PID_Rpm.Init(0.0f, 0.0f, 0.0f, 0.0f, 16384.0f, 16384.0f);
+  Left_Fric.PID_Rpm.Init(50.0f, 0.0f, 0.0f, 0.0f, 16384.0f, 16384.0f);
+  Right_Fric.PID_Rpm.Init(50.0f, 0.0f, 0.0f, 0.0f, 16384.0f, 16384.0f);
   Left_Fric.Init(&hcan1, CAN_Motor_ID_0x203, Control_Method_RPM);
   Right_Fric.Init(&hcan1, CAN_Motor_ID_0x202, Control_Method_RPM);
 
-  Dial_Motor.PID_Rpm.Init(0.0f, 0.0f, 0.0f, 0.0f, 10000.0f, 10000.0f);
-  Dial_Motor.PID_Angle.Init(0.0f, 0.0f, 0.0f, 0.0f, 720.f, 720.f);
-  Dial_Motor.Init(&hcan1, CAN_Motor_ID_0x201, Control_Method_RPM);
-
-  Yaw_Motor.PID_Torque.Init(0.8f, 100.0f, 0.0f, 0.0f, 30000.0f, 30000.0f);
-  Yaw_Motor.PID_Rpm.Init(5.0f, 0.0f, 0.0f, 0.0f, 25000.0f, 25000.0f);
-  Yaw_Motor.PID_Angle.Init(0.0f, 0.0f, 0.0f, 0.0f, 720.f, 720.f);
-  Yaw_Motor.Init(&hcan2, CAN_Motor_ID_0x209, Control_Method_RPM);
-
-  Pitch_Motor.PID_Torque.Init(0.8f, 100.0f, 0.0f, 0.0f, 30000.0f, 30000.0f);
-  Pitch_Motor.PID_Rpm.Init(5.0f, 0.0f, 0.0f, 0.0f, 25000.0f, 25000.0f);
-  Pitch_Motor.PID_Angle.Init(0.0f, 0.0f, 0.0f, 0.0f, 720.f, 720.f);
-  Pitch_Motor.Init(&hcan1, CAN_Motor_ID_0x206, Control_Method_RPM);
+  Dial_Motor.PID_Rpm.Init(15.0f, 30.0f, 1.5f, 0.0f, 10000.0f, 10000.0f);
+  Dial_Motor.PID_Angle.Init(5.0f, 0.0f, 0.0f, 0.0f, 720.f, 720.f);
+  Dial_Motor.Init(&hcan1, CAN_Motor_ID_0x201, Control_Method_ANGLE);
+  // Dial_Motor.Init(&hcan1, CAN_Motor_ID_0x201, Control_Method_RPM);
+  
+  Pitch_Motor.PID_Rpm.Init(30.0f, 50.0f, 0.0f, 0.0f, 25000.0f, 25000.0f);
+  Pitch_Motor.PID_Angle.Init(15.0f, 0.0f, 0.0f, 0.0f, 720.f, 720.f);
+  Pitch_Motor.Init(&hcan1, CAN_Motor_ID_0x206, Control_Method_ANGLE);
+  Yaw_Motor.PID_Rpm.Init(400.0f, 400.0f, 0.0f, 0.0f, 25000.0f, 25000.0f);
+  Yaw_Motor.PID_Angle.Init(1.5f, 0.0f, 0.0f, 0.0f, 720.f, 720.f);
+  Yaw_Motor.PID_Angle.Set_D_First(PID_D_First_ENABLE);
+  Yaw_Motor.Init(&hcan2, CAN_Motor_ID_0x209, Control_Method_ANGLE);
 }
 
 /* ---------- Callback Funtions ---------- */

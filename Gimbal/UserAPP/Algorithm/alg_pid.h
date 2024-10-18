@@ -51,6 +51,7 @@ public:
     void Set_I_Variable_Speed_A(float __Variable_Speed_I_A);
     void Set_I_Variable_Speed_B(float __Variable_Speed_I_B);
     void Set_I_Separate_Threshold(float __I_Separate_Threshold);
+		void Set_D_First(enum Enum_PID_D_First __D_First);
     void Set_Target(float __Target);
     void Set_Now(float __Now);
     void Set_Integral_Error(float __Integral_Error);

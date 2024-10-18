@@ -6,6 +6,7 @@
 #include <FreeRTOS.h>
 #include <task.h>
 #include <queue.h>
+#include <semphr.h>
 #include <stm32f4xx.h>
 
 #include "main.h"

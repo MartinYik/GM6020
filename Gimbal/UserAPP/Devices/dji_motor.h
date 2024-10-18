@@ -110,6 +110,7 @@ public:
     void Set_Target_Rpm(float __Target_Rpm);
     void Set_Target_Torque(float __Target_Torque);
     void Set_Out(float __Out);
+    void Set_Zero();
 
     void CAN_RxCpltCallback(uint8_t *Rx_Data);
     void TIM_Alive_PeriodElapsedCallback();
@@ -224,6 +225,7 @@ public:
     void Set_Target_Rpm(float __Target_Rpm);
     void Set_Target_Torque(float __Target_Torque);
     void Set_Out(float __Out);
+    void Set_Zero();
 
     void CAN_RxCpltCallback(uint8_t *Rx_Data);
     void TIM_Alive_PeriodElapsedCallback();
@@ -338,6 +340,7 @@ public:
     void Set_Target_Rpm(float __Target_Rpm);
     void Set_Target_Torque(float __Target_Torque);
     void Set_Out(float __Out);
+    void Set_Zero();
 
     void CAN_RxCpltCallback(uint8_t *Rx_Data);
     void TIM_Alive_PeriodElapsedCallback();

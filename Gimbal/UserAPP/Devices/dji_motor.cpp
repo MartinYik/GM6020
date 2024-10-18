@@ -356,6 +356,17 @@ void Class_Motor_GM6020::Set_Out(float __Out)
 }
 
 /**
+ * @brief 电机输出置零
+ *
+ * @param none
+ */
+void Class_Motor_GM6020::Set_Zero()
+{
+    Out = 0.f;
+    Output();
+}
+
+/**
  * @brief CAN通信接收回调函数
  *
  * @param Rx_Data 接收的数据
@@ -386,7 +397,7 @@ void Class_Motor_GM6020::CAN_RxCpltCallback(uint8_t *Rx_Data)
     }
     Total_Encoder = Total_Round * Encoder_Num_Per_Round + Rx_Encoder + Encoder_Offset;
 
-    Now_Angle = (float)Total_Encoder / (float)Encoder_Num_Per_Round * 2.0f * PI;
+    Now_Angle = (float)Total_Encoder / (float)Encoder_Num_Per_Round * 360.f;
     Now_Rpm = (float)Rx_Rpm;
     Now_Torque = Rx_Torque;
     Now_Temperature = Rx_Temperature;
@@ -465,13 +476,16 @@ void Class_Motor_GM6020::TIM_PID_PeriodElapsedCallback()
         PID_Rpm.Set_Now(Now_Rpm);
         PID_Rpm.TIM_Adjust_PeriodElapsedCallback();
 
-        Target_Torque = PID_Rpm.Get_Out();
+        //        Target_Torque = PID_Rpm.Get_Out();
 
-        PID_Torque.Set_Target(Target_Torque);
-        PID_Torque.Set_Now(Now_Torque);
-        PID_Torque.TIM_Adjust_PeriodElapsedCallback();
+        //        PID_Torque.Set_Target(Target_Torque);
+        //        PID_Torque.Set_Now(Now_Torque);
+        //        PID_Torque.TIM_Adjust_PeriodElapsedCallback();
 
-        Set_Out(PID_Torque.Get_Out());
+        //        Set_Out(PID_Torque.Get_Out());
+
+        // Delete Torque
+        Set_Out(PID_Rpm.Get_Out());
     }
     break;
     default:
@@ -677,6 +691,17 @@ void Class_Motor_C610::Set_Target_Torque(float __Target_Torque)
 void Class_Motor_C610::Set_Out(float __Out)
 {
     Out = __Out;
+}
+
+/**
+ * @brief 电机输出置零
+ *
+ * @param none
+ */
+void Class_Motor_C610::Set_Zero()
+{
+    Out = 0.f;
+    Output();
 }
 
 /**
@@ -988,6 +1013,17 @@ void Class_Motor_C620::Set_Out(float __Out)
 }
 
 /**
+ * @brief 电机输出置零
+ *
+ * @param none
+ */
+void Class_Motor_C620::Set_Zero()
+{
+    Out = 0.f;
+    Output();
+}
+
+/**
  * @brief CAN通信接收回调函数
  *
  * @param Rx_Data 接收的数据
@@ -1019,7 +1055,8 @@ void Class_Motor_C620::CAN_RxCpltCallback(uint8_t *Rx_Data)
     Total_Encoder = Total_Round * Encoder_Num_Per_Round + Rx_Encoder;
 
     Now_Angle = (float)Total_Encoder / (float)Encoder_Num_Per_Round * 360.0f / Gearbox_Rate;
-    Now_Rpm = (float)Rx_Rpm / Gearbox_Rate;
+    // Now_Rpm = (float)Rx_Rpm / Gearbox_Rate;
+    Now_Rpm = (float)Rx_Rpm;
     Now_Torque = Rx_Torque;
     Now_Temperature = Rx_Temperature;
 }

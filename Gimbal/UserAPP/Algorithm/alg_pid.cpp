@@ -159,6 +159,15 @@ void Class_PID::Set_I_Separate_Threshold(float __I_Separate_Threshold)
 {
     I_Separate_Threshold = __I_Separate_Threshold;
 }
+/**
+ * @brief 设定是否使用积分分离
+ *
+ * @param __D_First 是否使用积分分离
+ */
+void Class_PID::Set_D_First(enum Enum_PID_D_First __D_First)
+{
+    D_First = __D_First;
+}
 
 /**
  * @brief 设定目标值

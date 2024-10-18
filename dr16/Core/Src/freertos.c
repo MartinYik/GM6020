@@ -56,16 +56,16 @@ extern const RC_ctrl_t *local_rc_ctrl;
 /* Definitions for motorTask */
 osThreadId_t motorTaskHandle;
 const osThreadAttr_t motorTask_attributes = {
-  .name = "motorTask",
-  .stack_size = 128 * 4,
-  .priority = (osPriority_t) osPriorityNormal,
+    .name = "motorTask",
+    .stack_size = 128 * 4,
+    .priority = (osPriority_t)osPriorityNormal,
 };
 /* Definitions for rcTask */
 osThreadId_t rcTaskHandle;
 const osThreadAttr_t rcTask_attributes = {
-  .name = "rcTask",
-  .stack_size = 128 * 4,
-  .priority = (osPriority_t) osPriorityNormal,
+    .name = "rcTask",
+    .stack_size = 128 * 4,
+    .priority = (osPriority_t)osPriorityNormal,
 };
 
 /* Private function prototypes -----------------------------------------------*/
@@ -79,46 +79,46 @@ void RCTask(void *argument);
 void MX_FREERTOS_Init(void); /* (MISRA C 2004 rule 8.1) */
 
 /**
-  * @brief  FreeRTOS initialization
-  * @param  None
-  * @retval None
-  */
-void MX_FREERTOS_Init(void) {
-  /* USER CODE BEGIN Init */
+ * @brief  FreeRTOS initialization
+ * @param  None
+ * @retval None
+ */
+void MX_FREERTOS_Init(void)
+{
+    /* USER CODE BEGIN Init */
 
-  /* USER CODE END Init */
+    /* USER CODE END Init */
 
-  /* USER CODE BEGIN RTOS_MUTEX */
-  /* add mutexes, ... */
-  /* USER CODE END RTOS_MUTEX */
+    /* USER CODE BEGIN RTOS_MUTEX */
+    /* add mutexes, ... */
+    /* USER CODE END RTOS_MUTEX */
 
-  /* USER CODE BEGIN RTOS_SEMAPHORES */
-  /* add semaphores, ... */
-  /* USER CODE END RTOS_SEMAPHORES */
+    /* USER CODE BEGIN RTOS_SEMAPHORES */
+    /* add semaphores, ... */
+    /* USER CODE END RTOS_SEMAPHORES */
 
-  /* USER CODE BEGIN RTOS_TIMERS */
-  /* start timers, add new ones, ... */
-  /* USER CODE END RTOS_TIMERS */
+    /* USER CODE BEGIN RTOS_TIMERS */
+    /* start timers, add new ones, ... */
+    /* USER CODE END RTOS_TIMERS */
 
-  /* USER CODE BEGIN RTOS_QUEUES */
-  /* add queues, ... */
-  /* USER CODE END RTOS_QUEUES */
+    /* USER CODE BEGIN RTOS_QUEUES */
+    /* add queues, ... */
+    /* USER CODE END RTOS_QUEUES */
 
-  /* Create the thread(s) */
-  /* creation of motorTask */
-  motorTaskHandle = osThreadNew(MotorTask, NULL, &motorTask_attributes);
+    /* Create the thread(s) */
+    /* creation of motorTask */
+    motorTaskHandle = osThreadNew(MotorTask, NULL, &motorTask_attributes);
 
-  /* creation of rcTask */
-  rcTaskHandle = osThreadNew(RCTask, NULL, &rcTask_attributes);
+    /* creation of rcTask */
+    rcTaskHandle = osThreadNew(RCTask, NULL, &rcTask_attributes);
 
-  /* USER CODE BEGIN RTOS_THREADS */
-  /* add threads, ... */
-  /* USER CODE END RTOS_THREADS */
+    /* USER CODE BEGIN RTOS_THREADS */
+    /* add threads, ... */
+    /* USER CODE END RTOS_THREADS */
 
-  /* USER CODE BEGIN RTOS_EVENTS */
-  /* add events, ... */
-  /* USER CODE END RTOS_EVENTS */
-
+    /* USER CODE BEGIN RTOS_EVENTS */
+    /* add events, ... */
+    /* USER CODE END RTOS_EVENTS */
 }
 
 /* USER CODE BEGIN Header_MotorTask */
@@ -130,33 +130,33 @@ void MX_FREERTOS_Init(void) {
 /* USER CODE END Header_MotorTask */
 void MotorTask(void *argument)
 {
-  /* USER CODE BEGIN MotorTask */
-  PID_Controller PID_Speed = {10, 0, 0};
-  PID_Speed.i_out = 0;
-  PID_Speed.i_max = 15000;
-  /* Infinite loop */
-  for (;;)
-  {
-    if (motor_flag == 1)
+    /* USER CODE BEGIN MotorTask */
+    PID_Controller PID_Speed = {10, 0, 0};
+    PID_Speed.i_out = 0;
+    PID_Speed.i_max = 15000;
+    /* Infinite loop */
+    for (;;)
     {
-		Target = -(local_rc_ctrl->rc.ch[0] / 2);
-		Current = Tx_Data[1];
-		Torque = PID_Calc(&PID_Speed, Current, Target);
-    }
-    else
-    {
-      Torque = 0;
-    }
+        if (motor_flag == 1)
+        {
+            Target = -(local_rc_ctrl->rc.ch[0] / 2);
+            Current = Tx_Data[1];
+            Torque = PID_Calc(&PID_Speed, Current, Target);
+        }
+        else
+        {
+            Torque = 0;
+        }
 
-    CAN2_0x2ff_Tx_Data[0] = Torque >> 8;
-    CAN2_0x2ff_Tx_Data[1] = Torque;
-    CANx_SendData(&hcan2, 0x2ff, CAN2_0x2ff_Tx_Data, 8);
-	HAL_UART_Transmit(&huart4, (uint8_t *)&Current, sizeof(float), HAL_MAX_DELAY);
-	HAL_UART_Transmit(&huart4, (uint8_t *)&Target, sizeof(float), HAL_MAX_DELAY);
-	HAL_UART_Transmit(&huart4, tail,  4, 100);
-    osDelay(5);
-  }
-  /* USER CODE END MotorTask */
+        CAN2_0x2ff_Tx_Data[0] = Torque >> 8;
+        CAN2_0x2ff_Tx_Data[1] = Torque;
+        CANx_SendData(&hcan2, 0x2ff, CAN2_0x2ff_Tx_Data, 8);
+        HAL_UART_Transmit(&huart4, (uint8_t *)&Current, sizeof(float), HAL_MAX_DELAY);
+        HAL_UART_Transmit(&huart4, (uint8_t *)&Target, sizeof(float), HAL_MAX_DELAY);
+        HAL_UART_Transmit(&huart4, tail, 4, 100);
+        osDelay(5);
+    }
+    /* USER CODE END MotorTask */
 }
 
 /* USER CODE BEGIN Header_RCTask */
@@ -168,26 +168,25 @@ void MotorTask(void *argument)
 /* USER CODE END Header_RCTask */
 void RCTask(void *argument)
 {
-  /* USER CODE BEGIN RCTask */
-  /* Infinite loop */
-  for (;;)
-  {
-    if (last_rc_flag == rc_flag)
+    /* USER CODE BEGIN RCTask */
+    /* Infinite loop */
+    for (;;)
     {
-      motor_flag = 0;
+        if (last_rc_flag == rc_flag)
+        {
+            motor_flag = 0;
+        }
+        else
+        {
+            motor_flag = 1;
+        }
+        last_rc_flag = rc_flag;
+        osDelay(100);
     }
-    else
-    {
-      motor_flag = 1;
-    }
-    last_rc_flag = rc_flag;
-    osDelay(100);
-  }
-  /* USER CODE END RCTask */
+    /* USER CODE END RCTask */
 }
 
 /* Private application code --------------------------------------------------*/
 /* USER CODE BEGIN Application */
 
 /* USER CODE END Application */
-
