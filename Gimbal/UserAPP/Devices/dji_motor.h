@@ -5,6 +5,7 @@
  * @version 0.2
  * @date 2022-08-03
  * @date 2024-10-17 0.2 修改了一些相关配置
+ * @date 2024-10-19 0.3 增加了MPU6050速度环控制
  *
  * @copyright USTC-RoboWalker (c) 2022
  *
@@ -22,7 +23,7 @@
 
 // RPM换算到rad/s 弃用
 #define RPM_TO_RADPS (2.0f * PI / 60.0f)
-
+#define RADPS_TO_RPM (60.0f / (2.0f * PI))
 /* Exported types ------------------------------------------------------------*/
 
 /**
@@ -90,6 +91,8 @@ public:
     Class_PID PID_Rpm;
     // PID扭矩环控制
     Class_PID PID_Torque;
+    // PIDMPU角速度环控制
+    Class_PID PID_MPU_Rpm;
 
     void Init(CAN_HandleTypeDef *__hcan, Enum_CAN_Motor_ID __CAN_ID, Enum_Control_Method __Control_Method = Control_Method_ANGLE, int32_t __Encoder_Offset = 0, float __Rpm_Max = 320.0f);
 
@@ -97,6 +100,7 @@ public:
     Enum_CAN_Motor_Status Get_CAN_Motor_Status();
     float Get_Now_Angle();
     float Get_Now_Rpm();
+    float Get_Now_MPU_Rpm();
     float Get_Now_Torque();
     uint8_t Get_Now_Temperature();
     Enum_Control_Method Get_Control_Method();
@@ -110,6 +114,7 @@ public:
     void Set_Target_Rpm(float __Target_Rpm);
     void Set_Target_Torque(float __Target_Torque);
     void Set_Out(float __Out);
+    void Set_MPU_Rpm(float __MPU_Rads);
     void Set_Zero();
 
     void CAN_RxCpltCallback(uint8_t *Rx_Data);
@@ -148,6 +153,8 @@ protected:
     uint16_t Rx_Encoder = 0;
     // 接收的速度, rpm
     int16_t Rx_Rpm = 0;
+    // 从MPU6050接收并转换的角速度, rpm
+    int16_t Now_MPU_Rpm = 0;
     // 接收的扭矩, 目标的扭矩, -30000~30000
     int16_t Rx_Torque = 0;
     // 接收的温度, 摄氏度

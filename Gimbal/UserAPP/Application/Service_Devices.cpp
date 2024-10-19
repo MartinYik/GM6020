@@ -3,6 +3,7 @@
 /* Private define ------------------------------------------------------------*/
 TaskHandle_t Gimbal_Control_Handle;
 TaskHandle_t DR16_Handle;
+TaskHandle_t IMU_Get_Data_Handle;
 TaskHandle_t Shoot_Control_Handle;
 TaskHandle_t PitchYaw_Control_Handle;
 TaskHandle_t MotorSet_Handle;
@@ -15,13 +16,15 @@ float Right_Fric_Target_Rpm, Right_Fric_Now_Rpm;
 float Dial_Target_Rpm, Dial_Now_Rpm, Dial_Target_Angle, Dial_Now_Angle;
 float Yaw_Target_Rpm, Yaw_Now_Rpm, Yaw_Target_Angle, Yaw_Now_Angle;
 float Pitch_Target_Rpm, Pitch_Now_Rpm, Pitch_Target_Angle, Pitch_Now_Angle;
+float IMU_Yaw_Rpm, IMU_Pitch_Rpm;
 bool dr16_flag = true;
-uint8_t dial_flag;
+uint8_t dial_flag = 1;
 float tmp_Target_Rpm;
 float tmp_Target_Angle;
 /* Private function declarations ---------------------------------------------*/
 void Gimbal_Control(void *arg);
 void DR16_Test(void *arg);
+void IMU_Get_Data(void *arg);
 void Shoot_Control(void *arg);
 void PitchYaw_Control(void *arg);
 void Motor_Set(void *arg);
@@ -46,6 +49,7 @@ void Service_Devices_Init(void)
 	rc_protect_Handle = xSemaphoreCreateBinary();
 	xTaskCreate(Gimbal_Control, "Gimbal_Control", Normal_Stack_Size, NULL, PrioritySuperHigh, &Gimbal_Control_Handle);
 	xTaskCreate(DR16_Test, "DR16_Test", Normal_Stack_Size, NULL, PriorityHigh, &DR16_Handle);
+	xTaskCreate(IMU_Get_Data, "IMU_Get_Data", Normal_Stack_Size, NULL, PriorityHigh, &IMU_Get_Data_Handle);
 	xTaskCreate(Shoot_Control, "Shoot_Control", Normal_Stack_Size, NULL, PriorityNormal, &Shoot_Control_Handle);
 	xTaskCreate(PitchYaw_Control, "PitchYaw_Control", Normal_Stack_Size, NULL, PriorityNormal, &PitchYaw_Control_Handle);
 	xTaskCreate(Motor_Set, "Motor_Set", Normal_Stack_Size, NULL, PriorityNormal, &MotorSet_Handle);
@@ -120,15 +124,28 @@ void DR16_Test(void *arg)
 		{
 			dr16_flag = true;
 		}
-
 		osDelay(100);
+	}
+}
+
+void IMU_Get_Data(void *arg)
+{
+	for (;;)
+	{
+		if (!MPU_Get_Gyroscope(&MPU6050_IIC_PIN, &MPUData.gx, &MPUData.gy, &MPUData.gz))
+		{
+			MPUData.gx -= MPUData.gxoffset;
+			MPUData.gy -= MPUData.gyoffset;
+			MPUData.gz -= MPUData.gzoffset;
+		}
+		osDelay(1);
 	}
 }
 
 void Shoot_Control(void *arg)
 {
 	/* Cache for Task */
-
+	Dial_Target_Angle = 0.0f;
 	/* Pre-Load for task */
 
 	/* Infinite loop */
@@ -163,29 +180,29 @@ void Shoot_Control(void *arg)
 				if (dial_flag != 1)
 				{
 					dial_flag = 1;
-					Dial_Target_Angle = Dial_Motor.Get_Now_Angle();
+					Dial_Target_Angle = Dial_Motor.Get_Target_Angle();
 					Dial_Target_Angle += 40.f;
 					Dial_Motor.Set_Target_Angle(Dial_Target_Angle);
 					Dial_Now_Angle = Dial_Motor.Get_Now_Angle();
-					Dial_Target_Angle = Dial_Motor.Get_Now_Angle();
+					// Dial_Target_Angle = Dial_Motor.Get_Now_Angle();
 					Dial_Target_Rpm = Dial_Motor.Get_Target_Rpm();
 					Dial_Now_Rpm = Dial_Motor.Get_Now_Rpm();
-					
-//					Dial_Motor.Set_Target_Angle(tmp_Target_Angle);
-//					Dial_Target_Angle = Dial_Motor.Get_Target_Angle();
-//					Dial_Now_Angle = Dial_Motor.Get_Now_Angle();					
-//					Dial_Target_Rpm = Dial_Motor.Get_Target_Rpm();
-//					Dial_Now_Rpm = Dial_Motor.Get_Now_Rpm();
+
+					// Dial_Motor.Set_Target_Angle(tmp_Target_Angle);
+					// Dial_Target_Angle = Dial_Motor.Get_Target_Angle();
+					// Dial_Now_Angle = Dial_Motor.Get_Now_Angle();
+					// Dial_Target_Rpm = Dial_Motor.Get_Target_Rpm();
+					// Dial_Now_Rpm = Dial_Motor.Get_Now_Rpm();
 				}
 			}
 			else if (DR16.Get_Right_Switch() == 6)
 			{
 				// 连发模式
-				dial_flag = 2;					
-				Dial_Target_Angle = Dial_Motor.Get_Now_Angle();
+				dial_flag = 2;
+				Dial_Target_Angle = Dial_Motor.Get_Target_Angle();
 				Dial_Target_Angle += 40.f;
 				Dial_Motor.Set_Target_Angle(Dial_Target_Angle);
-				Dial_Target_Angle = Dial_Motor.Get_Now_Angle();
+				// Dial_Target_Angle = Dial_Motor.Get_Target_Angle();
 				Dial_Now_Angle = Dial_Motor.Get_Now_Angle();
 				Dial_Target_Rpm = Dial_Motor.Get_Target_Rpm();
 				Dial_Now_Rpm = Dial_Motor.Get_Now_Rpm();
@@ -193,7 +210,7 @@ void Shoot_Control(void *arg)
 			else
 			{
 				dial_flag = 0;
-				Dial_Target_Angle = Dial_Motor.Get_Now_Angle();
+				Dial_Target_Angle = Dial_Motor.Get_Target_Angle();
 				Dial_Now_Angle = Dial_Motor.Get_Now_Angle();
 				Dial_Motor.Set_Zero();
 				Dial_Motor.Set_Target_Rpm(0.f);
@@ -225,16 +242,18 @@ void PitchYaw_Control(void *arg)
 			Pitch_Motor.Set_Target_Angle(Pitch_Target_Angle);
 			Pitch_Now_Angle = Pitch_Motor.Get_Now_Angle();
 			Pitch_Target_Rpm = Pitch_Motor.Get_Target_Rpm();
-			Pitch_Now_Rpm = Pitch_Motor.Get_Now_Rpm();
+			Pitch_Motor.Set_MPU_Rpm(-(MPUData.gy));
+			Pitch_Now_Rpm = Pitch_Motor.Get_Now_MPU_Rpm();
 
 			Yaw_Target_Angle -= DR16.Get_Right_X();
 			Yaw_Motor.Set_Target_Angle(Yaw_Target_Angle);
 			Yaw_Now_Angle = Yaw_Motor.Get_Now_Angle();
 			Yaw_Target_Rpm = Yaw_Motor.Get_Target_Rpm();
-			Yaw_Now_Rpm = Yaw_Motor.Get_Now_Rpm();
+			Yaw_Motor.Set_MPU_Rpm(MPUData.gz);
+			Yaw_Now_Rpm = Yaw_Motor.Get_Now_MPU_Rpm();
 		}
 
-		osDelay(5);
+		osDelay(10);
 	}
 }
 
@@ -267,10 +286,10 @@ void Serial_Transmit(void *arg)
 		// HAL_UART_Transmit(&huart5, (uint8_t *)&Left_Fric_Target_Rpm, sizeof(float), HAL_MAX_DELAY);
 		// HAL_UART_Transmit(&huart5, (uint8_t *)&Right_Fric_Now_Rpm, sizeof(float), HAL_MAX_DELAY);
 		// HAL_UART_Transmit(&huart5, (uint8_t *)&Right_Fric_Target_Rpm, sizeof(float), HAL_MAX_DELAY);
-		HAL_UART_Transmit(&huart5, (uint8_t *)&Dial_Now_Rpm, sizeof(float), HAL_MAX_DELAY);
-		HAL_UART_Transmit(&huart5, (uint8_t *)&Dial_Target_Rpm, sizeof(float), HAL_MAX_DELAY);
-		HAL_UART_Transmit(&huart5, (uint8_t *)&Dial_Now_Angle, sizeof(float), HAL_MAX_DELAY);
-		HAL_UART_Transmit(&huart5, (uint8_t *)&Dial_Target_Angle, sizeof(float), HAL_MAX_DELAY);
+		// HAL_UART_Transmit(&huart5, (uint8_t *)&Dial_Now_Rpm, sizeof(float), HAL_MAX_DELAY);
+		// HAL_UART_Transmit(&huart5, (uint8_t *)&Dial_Target_Rpm, sizeof(float), HAL_MAX_DELAY);
+		// HAL_UART_Transmit(&huart5, (uint8_t *)&Dial_Now_Angle, sizeof(float), HAL_MAX_DELAY);
+		// HAL_UART_Transmit(&huart5, (uint8_t *)&Dial_Target_Angle, sizeof(float), HAL_MAX_DELAY);
 		// HAL_UART_Transmit(&huart5, (uint8_t *)&Pitch_Now_Rpm, sizeof(float), HAL_MAX_DELAY);
 		// HAL_UART_Transmit(&huart5, (uint8_t *)&Pitch_Target_Rpm, sizeof(float), HAL_MAX_DELAY);
 		// HAL_UART_Transmit(&huart5, (uint8_t *)&Pitch_Now_Angle, sizeof(float), HAL_MAX_DELAY);

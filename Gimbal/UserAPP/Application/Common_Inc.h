@@ -12,10 +12,16 @@
 #include "main.h"
 #include "cmsis_os2.h"
 
+
+#include "drv_can.h"
+#include "drv_i2c.h"
 #include "led.h"
 #include "dr16.h"
-#include "drv_can.h"
 #include "dji_motor.h"
+#include "mpu6050.h"
+#include "mpu6050_config.h"
+#include "inv_mpu.h"
+#include "inv_mpu_dmp_motion_driver.h"
 /* Macro Definitions ---------------------------------------------------------*/
 #define Tiny_Stack_Size 64
 #define Small_Stack_Size 128
@@ -30,6 +36,11 @@
 #define PriorityHigh 6
 #define PrioritySuperHigh 7
 #define PriorityRealtime 8
+
+#define IMU_IIC_SCL_Pin GPIO_PIN_6
+#define IMU_IIC_SCL_GPIO_Port GPIOB
+#define IMU_IIC_SDA_Pin GPIO_PIN_7
+#define IMU_IIC_SDA_GPIO_Port GPIOB
 
 /* HAL Handlers --------------------------------------------------------------*/
 extern CAN_HandleTypeDef hcan1;

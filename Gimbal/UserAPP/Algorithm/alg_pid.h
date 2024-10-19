@@ -15,7 +15,7 @@
 /* Includes ------------------------------------------------------------------*/
 
 #include "drv_math.h"
-
+#include "filters.h"
 /* Exported macros -----------------------------------------------------------*/
 
 /* Exported types ------------------------------------------------------------*/
@@ -51,10 +51,14 @@ public:
     void Set_I_Variable_Speed_A(float __Variable_Speed_I_A);
     void Set_I_Variable_Speed_B(float __Variable_Speed_I_B);
     void Set_I_Separate_Threshold(float __I_Separate_Threshold);
-		void Set_D_First(enum Enum_PID_D_First __D_First);
+    void Set_D_First(enum Enum_PID_D_First __D_First);
     void Set_Target(float __Target);
     void Set_Now(float __Now);
     void Set_Integral_Error(float __Integral_Error);
+
+    LowPassFilter LowPass_error = LowPassFilter(0.8);
+    LowPassFilter LowPass_d_err = LowPassFilter(1); /*!< 不完全微分。 */
+    MedianFilter<5> Median_error;
 
     void TIM_Adjust_PeriodElapsedCallback();
 

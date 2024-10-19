@@ -222,6 +222,10 @@ void Class_PID::TIM_Adjust_PeriodElapsedCallback()
     float speed_ratio;
 
     error = Target - Now;
+    // 对error进行低通滤波
+    //error = LowPass_error.f(error);
+    // 对error进行中值滤波
+    // error = Median_error.f(error);
     abs_error = Math_Abs(error);
 
     // 判断死区
