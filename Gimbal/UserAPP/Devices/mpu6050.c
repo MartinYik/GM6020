@@ -1,40 +1,3 @@
-/**
-  ******************************************************************************
-  * Copyright (c) 2019 - ~, SCUT-RobotLab Development Team
-  * @file    mpu6050.cpp
-  * @author  YDX 2244907035@qq.com
-  * @brief   Code for MPU6050.
-  * @date    2019-11-21
-  * @version 1.1
-  * @par Change Log:
-  * <table>
-  * <tr><th>Date        <th>Version  <th>Author         <th>Description
-  * <tr><td>2018-10-18  <td> 1.0     <td>mannychen      <td>Creator
-  * <tr><td>2019-11-21  <td> 1.1     <td>YDX            <td>Remove iic functions \n
-  *                                                         add notes.
-  * </table>
-  *
-  ==============================================================================
-						  How to use this driver
-  ==============================================================================
-	@note
-	  -# 使用说明在`mpu6050_config.c`。
-
-	@warning
-
-  ******************************************************************************
-  * @attention
-  *
-  * if you had modified this file, please make sure your code does not have many
-  * bugs, update the version Number, write dowm your name and the date, the most
-  * important is make sure the users will have clear and definite understanding
-  * through your new brief.
-  *
-  * <h2><center>&copy; Copyright (c) 2019 - ~, SCUT-RobotLab Development Team.
-  * All rights reserved.</center></h2>
-  ******************************************************************************
-  */
-
 /* Includes ------------------------------------------------------------------*/
 #include "mpu6050.h"
 
@@ -222,5 +185,3 @@ unsigned char MPU_Get_Accelerometer(IIC_PIN_Typedef *iic_pin, short *ax, short *
 	return res;
 	;
 }
-
-/************************ COPYRIGHT(C) SCUT-ROBOTLAB **************************/
