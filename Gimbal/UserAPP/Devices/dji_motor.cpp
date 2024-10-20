@@ -828,6 +828,8 @@ void Class_Motor_C610::TIM_PID_PeriodElapsedCallback()
 
 		Target_Rpm = PID_Angle.Get_Out();
 
+		Now_Rpm = PID_Rpm.LowPass_Filter.f(Now_Rpm);
+
 		PID_Rpm.Set_Target(Target_Rpm);
 		PID_Rpm.Set_Now(Now_Rpm);
 		PID_Rpm.TIM_Adjust_PeriodElapsedCallback();

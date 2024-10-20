@@ -3,21 +3,23 @@
 
 #include "gpio.h"
 #ifdef __cplusplus
-extern "C" {
-	
-class LED_Classdef
+extern "C"
 {
+
+	class LED_Classdef
+	{
 	private:
-		GPIO_TypeDef* Led_GPIO_Port = GPIOC;
-		uint16_t Led_Pin = GPIO_PIN_13;
+		GPIO_TypeDef *Led_GPIO_Port;
+		uint16_t Led_Pin;
+
 	public:
-//		LED_Classdef();
+		void Init(GPIO_TypeDef *GPIOx, uint16_t GPIO_Pin);
 		void LedToggle();
-};
+	};
 
 #endif
-#ifdef  __cplusplus
+#ifdef __cplusplus
 }
-#endif 
+#endif
 
 #endif

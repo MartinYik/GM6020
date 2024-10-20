@@ -1,25 +1,3 @@
-/**
-  ******************************************************************************
-  * @file   System_config.cpp
-  * @brief  Deploy resources,tasks and services in this file.
-  ******************************************************************************
-  * @note
-  *  - Before running your Task you should first include your headers and init-
-  *    ialize used resources in "System_Resource_Init()". This function will be
-  *    called before tasks Start.
-  *
-  *  - All tasks should be created in "System_Tasks_Init()", this function will
-  *    be called in 'defaultTask()'.
-  *
-  ===============================================================================
-									Task List
-  ===============================================================================
-  * <table>
-  * <tr><th>Task Name     <th>Priority          <th>Frequency/Hz    <th>Stack/Byte
-  * <tr><td>              <td>                  <td>                <td>
-  * </table>
-  *
- */
 /* Includes ------------------------------------------------------------------*/
 #include "UserMain.h"
 #include "Common_Inc.h"
@@ -65,6 +43,8 @@ void System_Source_Init()
 		ret = MPU6050_Init(GPIOB, GPIO_PIN_6, GPIO_PIN_7);
 	} while (ret);
 
+	led13.Init(GPIOC, GPIO_PIN_13);
+
 	DR16.Init(&huart2);
 
 	Left_Fric.PID_Rpm.Init(25.0f, 0.0f, 0.0f, 0.0f, 16384.0f, 16384.0f);
@@ -72,17 +52,18 @@ void System_Source_Init()
 	Left_Fric.Init(&hcan1, CAN_Motor_ID_0x203, Control_Method_RPM);
 	Right_Fric.Init(&hcan1, CAN_Motor_ID_0x202, Control_Method_RPM);
 
-	// Dial_Motor.PID_Rpm.Init(15.0f, 10.0f, 1.5f, 0.0f, 10000.0f, 10000.0f);
-	// Dial_Motor.PID_Angle.Init(1.5f, 0.0f, 0.0f, 0.0f, 720.f, 720.f);
-	Dial_Motor.PID_Rpm.Init(30.0f, 0.0f, 1.3f, 1.5f, 10000.0f, 10000.0f);
-	Dial_Motor.PID_Angle.Init(3.6f, 0.0f, 0.0f, 0.0f, 720.f, 720.f);
+	// Dial_Motor.PID_Rpm.Init(50.0f, 0.0f, 0.4f, 0.0f, 10000.0f, 10000.0f);
+	// Dial_Motor.PID_Angle.Init(20.0f, 0.0f, 0.0f, 0.0f, 180.f, 180.f);
+	Dial_Motor.PID_Rpm.Init(350.0f, 180.0f, 0.3f, 0.0f, 10000.0f, 10000.0f);
+	Dial_Motor.PID_Angle.Init(8.5f, 0.0f, 0.0f, 1.0f, 720.f, 720.f);
 	Dial_Motor.Init(&hcan1, CAN_Motor_ID_0x201, Control_Method_ANGLE);
 
-	Pitch_Motor.PID_MPU_Rpm.Init(3000.0f,20.0f,0.0f,100.0f,25000.0f,25000.0f);
+	Pitch_Motor.PID_MPU_Rpm.Init(3000.0f, 20.0f, 0.0f, 100.0f, 25000.0f, 25000.0f);
 	// Pitch_Motor.PID_Rpm.Init(30.0f, 50.0f, 0.0f, 0.0f, 25000.0f, 25000.0f);
 	Pitch_Motor.PID_Angle.Init(2.2f, 0.0f, 0.0f, 0.7f, 720.f, 720.f);
 	Pitch_Motor.Init(&hcan1, CAN_Motor_ID_0x206, Control_Method_ANGLE);
-	Yaw_Motor.PID_MPU_Rpm.Init(1600.0f,0.0f,0.0f,0.0f,25000.0f,25000.0f);
+	Yaw_Motor.PID_MPU_Rpm.Init(1600.0f, 0.0f, 0.0f, 0.0f, 25000.0f, 25000.0f);
+	// Yaw_Motor.PID_MPU_Rpm.Init(600.0f, 0.0f, 0.0f, 0.0f, 25000.0f, 25000.0f);
 	// Yaw_Motor.PID_Rpm.Init(570.0f, 5.0f, 0.0f, 0.0f, 25000.0f, 25000.0f);
 	Yaw_Motor.PID_Angle.Init(0.83f, 0.0f, 0.0f, 0.0f, 720.f, 720.f);
 	Yaw_Motor.PID_Angle.Set_D_First(PID_D_First_ENABLE);

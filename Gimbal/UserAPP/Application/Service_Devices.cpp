@@ -147,11 +147,13 @@ void Shoot_Control(void *arg)
 	/* Cache for Task */
 	Dial_Target_Angle = 0.0f;
 	/* Pre-Load for task */
-
+	TickType_t xLastWakeTime;
+	const TickType_t xFrequency = pdMS_TO_TICKS(50);
+	xLastWakeTime = xTaskGetTickCount();
 	/* Infinite loop */
-
 	for (;;)
 	{
+		vTaskDelayUntil(&xLastWakeTime, xFrequency);
 		if (dr16_flag)
 		{
 			/* ------ DR16数据处理 ------ */
@@ -183,13 +185,6 @@ void Shoot_Control(void *arg)
 					Dial_Target_Angle = Dial_Motor.Get_Target_Angle();
 					Dial_Target_Angle += 40.f;
 					Dial_Motor.Set_Target_Angle(Dial_Target_Angle);
-					Dial_Now_Angle = Dial_Motor.Get_Now_Angle();
-					// Dial_Target_Angle = Dial_Motor.Get_Now_Angle();
-					Dial_Target_Rpm = Dial_Motor.Get_Target_Rpm();
-					Dial_Now_Rpm = Dial_Motor.Get_Now_Rpm();
-
-					// Dial_Motor.Set_Target_Angle(tmp_Target_Angle);
-					// Dial_Target_Angle = Dial_Motor.Get_Target_Angle();
 					// Dial_Now_Angle = Dial_Motor.Get_Now_Angle();
 					// Dial_Target_Rpm = Dial_Motor.Get_Target_Rpm();
 					// Dial_Now_Rpm = Dial_Motor.Get_Now_Rpm();
@@ -202,30 +197,29 @@ void Shoot_Control(void *arg)
 				Dial_Target_Angle = Dial_Motor.Get_Target_Angle();
 				Dial_Target_Angle += 40.f;
 				Dial_Motor.Set_Target_Angle(Dial_Target_Angle);
-				// Dial_Target_Angle = Dial_Motor.Get_Target_Angle();
-				Dial_Now_Angle = Dial_Motor.Get_Now_Angle();
-				Dial_Target_Rpm = Dial_Motor.Get_Target_Rpm();
-				Dial_Now_Rpm = Dial_Motor.Get_Now_Rpm();
+				// Dial_Now_Angle = Dial_Motor.Get_Now_Angle();
+				// Dial_Target_Rpm = Dial_Motor.Get_Target_Rpm();
+				// Dial_Now_Rpm = Dial_Motor.Get_Now_Rpm();
 			}
 			else
 			{
 				dial_flag = 0;
 				Dial_Target_Angle = Dial_Motor.Get_Target_Angle();
-				Dial_Now_Angle = Dial_Motor.Get_Now_Angle();
+				// Dial_Now_Angle = Dial_Motor.Get_Now_Angle();
 				Dial_Motor.Set_Zero();
 				Dial_Motor.Set_Target_Rpm(0.f);
-				Dial_Target_Rpm = Dial_Motor.Get_Target_Rpm();
-				Dial_Now_Rpm = Dial_Motor.Get_Now_Rpm();
+				// Dial_Target_Rpm = Dial_Motor.Get_Target_Rpm();
+				// Dial_Now_Rpm = Dial_Motor.Get_Now_Rpm();
 			}
 		}
-		osDelay(50);
+		// osDelay(50);
 	}
 }
 
 void PitchYaw_Control(void *arg)
 {
-	Yaw_Target_Angle = 68.f;
-	Pitch_Target_Angle = 28.f;
+	Yaw_Target_Angle = 68.0f;
+	Pitch_Target_Angle = 28.0f;
 	for (;;)
 	{
 		if (dr16_flag)
@@ -246,6 +240,7 @@ void PitchYaw_Control(void *arg)
 			Pitch_Now_Rpm = Pitch_Motor.Get_Now_MPU_Rpm();
 
 			Yaw_Target_Angle -= DR16.Get_Right_X();
+			// Yaw_Target_Angle -= DR16.Get_Mouse_X();
 			Yaw_Motor.Set_Target_Angle(Yaw_Target_Angle);
 			Yaw_Now_Angle = Yaw_Motor.Get_Now_Angle();
 			Yaw_Target_Rpm = Yaw_Motor.Get_Target_Rpm();
@@ -259,10 +254,18 @@ void PitchYaw_Control(void *arg)
 
 void Motor_Set(void *arg)
 {
+	TickType_t xLastWakeTime;
+	const TickType_t xFrequency = pdMS_TO_TICKS(5);
+	xLastWakeTime = xTaskGetTickCount();
 	for (;;)
 	{
+		vTaskDelayUntil(&xLastWakeTime, xFrequency);
 		if (dr16_flag)
 		{
+			/* ------ 读取各电机当前数值 ------ */
+			Dial_Now_Angle = Dial_Motor.Get_Now_Angle();
+			Dial_Target_Rpm = Dial_Motor.Get_Target_Rpm();
+			Dial_Now_Rpm = Dial_Motor.Get_Now_Rpm();
 			/* ------ 各电机的PID计算 ------ */
 			Left_Fric.TIM_PID_PeriodElapsedCallback();
 			Right_Fric.TIM_PID_PeriodElapsedCallback();
@@ -270,17 +273,20 @@ void Motor_Set(void *arg)
 			Pitch_Motor.TIM_PID_PeriodElapsedCallback();
 			Yaw_Motor.TIM_PID_PeriodElapsedCallback();
 		}
-
 		/* ------ 各电机的CAN发送 ------ */
 		TIM_CAN_PeriodElapsedCallback();
-		osDelay(1);
+		// osDelay(1);
 	}
 }
 
 void Serial_Transmit(void *arg)
 {
+	TickType_t xLastWakeTime;
+	const TickType_t xFrequency = pdMS_TO_TICKS(5);
+	xLastWakeTime = xTaskGetTickCount();
 	for (;;)
 	{
+		vTaskDelayUntil(&xLastWakeTime, xFrequency);
 		// 打印各参数, 用于调试
 		// HAL_UART_Transmit(&huart5, (uint8_t *)&Left_Fric_Now_Rpm, sizeof(float), HAL_MAX_DELAY);
 		// HAL_UART_Transmit(&huart5, (uint8_t *)&Left_Fric_Target_Rpm, sizeof(float), HAL_MAX_DELAY);
@@ -290,10 +296,10 @@ void Serial_Transmit(void *arg)
 		// HAL_UART_Transmit(&huart5, (uint8_t *)&Dial_Target_Rpm, sizeof(float), HAL_MAX_DELAY);
 		// HAL_UART_Transmit(&huart5, (uint8_t *)&Dial_Now_Angle, sizeof(float), HAL_MAX_DELAY);
 		// HAL_UART_Transmit(&huart5, (uint8_t *)&Dial_Target_Angle, sizeof(float), HAL_MAX_DELAY);
-		// HAL_UART_Transmit(&huart5, (uint8_t *)&Pitch_Now_Rpm, sizeof(float), HAL_MAX_DELAY);
-		// HAL_UART_Transmit(&huart5, (uint8_t *)&Pitch_Target_Rpm, sizeof(float), HAL_MAX_DELAY);
-		// HAL_UART_Transmit(&huart5, (uint8_t *)&Pitch_Now_Angle, sizeof(float), HAL_MAX_DELAY);
-		// HAL_UART_Transmit(&huart5, (uint8_t *)&Pitch_Target_Angle, sizeof(float), HAL_MAX_DELAY);
+		HAL_UART_Transmit(&huart5, (uint8_t *)&Pitch_Now_Rpm, sizeof(float), HAL_MAX_DELAY);
+		HAL_UART_Transmit(&huart5, (uint8_t *)&Pitch_Target_Rpm, sizeof(float), HAL_MAX_DELAY);
+		HAL_UART_Transmit(&huart5, (uint8_t *)&Pitch_Now_Angle, sizeof(float), HAL_MAX_DELAY);
+		HAL_UART_Transmit(&huart5, (uint8_t *)&Pitch_Target_Angle, sizeof(float), HAL_MAX_DELAY);
 		// HAL_UART_Transmit(&huart5, (uint8_t *)&Yaw_Now_Rpm, sizeof(float), HAL_MAX_DELAY);
 		// HAL_UART_Transmit(&huart5, (uint8_t *)&Yaw_Target_Rpm, sizeof(float), HAL_MAX_DELAY);
 		// HAL_UART_Transmit(&huart5, (uint8_t *)&Yaw_Now_Angle, sizeof(float), HAL_MAX_DELAY);
@@ -301,7 +307,7 @@ void Serial_Transmit(void *arg)
 
 		// justfloat帧尾标志
 		HAL_UART_Transmit(&huart5, tail, 4, HAL_MAX_DELAY);
-		osDelay(5);
+		// osDelay(5);
 	}
 }
 void Led_Set(void *arg)

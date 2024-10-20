@@ -213,17 +213,12 @@
         <Ww>
           <count>11</count>
           <WinNumber>1</WinNumber>
-          <ItemText>\\Gimbal\../UserAPP/Application/Common_Inc.cpp\Yaw_Motor.PID_Rpm.K_D</ItemText>
+          <ItemText>MPUData,0x0A</ItemText>
         </Ww>
         <Ww>
           <count>12</count>
           <WinNumber>1</WinNumber>
-          <ItemText>\\Gimbal\../UserAPP/Application/Common_Inc.cpp\Yaw_Motor.PID_Rpm.K_I</ItemText>
-        </Ww>
-        <Ww>
-          <count>13</count>
-          <WinNumber>1</WinNumber>
-          <ItemText>MPUData,0x0A</ItemText>
+          <ItemText>\\Gimbal\../UserAPP/Application/Common_Inc.cpp\Dial_Motor.PID_Rpm.K_D</ItemText>
         </Ww>
       </WatchWindow1>
       <WatchWindow2>

@@ -56,9 +56,9 @@ public:
     void Set_Now(float __Now);
     void Set_Integral_Error(float __Integral_Error);
 
-    LowPassFilter LowPass_error = LowPassFilter(0.8);
-    LowPassFilter LowPass_d_err = LowPassFilter(1); /*!< 不完全微分。 */
-    MedianFilter<5> Median_error;
+    LowPassFilter LowPass_Filter = LowPassFilter(0.8);
+    // LowPassFilter LowPass_d_err = LowPassFilter(1); /*!< 不完全微分。 */
+    // MedianFilter<5> Median_error;
 
     void TIM_Adjust_PeriodElapsedCallback();
 
